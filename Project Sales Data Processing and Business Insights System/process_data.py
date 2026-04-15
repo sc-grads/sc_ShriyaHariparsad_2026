@@ -32,17 +32,38 @@ df = df.drop_duplicates()
 # Convert date column
 df['date'] = pd.to_datetime(df['date'], errors='coerce')
 
-# Save cleaned data
-df.to_csv('../output/clean_sales.csv', index=False)
-
 print(df.head())
 print(df.columns)
 print(df.info())
-
 print("Data cleaned successfully")
-
-# DATA TRANSFORMATION
 
 # Create revenue column
 df['revenue'] = df['quantity'] * df['price']
-logging.info("Revenue column created")
+logging.info("Revenue column created successfully")
+
+# Month extracted from date
+df['month'] = df['date'].dt.to_period('M')
+logging.info("Month column extracted from date successfully")
+print(df.head())
+
+# Save cleaned data
+df.to_csv('../output/clean_sales.csv', index=False)
+
+# Aggregations
+sales_by_region = df.groupby('region')['revenue'].sum().reset_index()
+logging.info("Sales by region calculated successfully")
+sales_by_product = df.groupby('product')['revenue'].sum().reset_index()
+logging.info("Sales by product calculated successfully")
+monthly_revenue = df.groupby('month')['revenue'].sum().reset_index()
+logging.info("Monthly revenue calculated successfully")
+salesperson_performance = df.groupby('salesperson')['revenue'].sum().reset_index()
+logging.info("Salesperson performance calculated successfully")
+
+# Save outputs
+sales_by_region.to_csv('../output/sales_by_region.csv', index=False)
+sales_by_product.to_csv('../output/sales_by_product.csv', index=False)
+monthly_revenue.to_csv('../output/monthly_revenue.csv', index=False)
+salesperson_performance.to_csv('../output/salesperson_performance.csv', index=False)
+
+logging.info("All aggregated files saved")
+print("revenue and month columns added successfully")

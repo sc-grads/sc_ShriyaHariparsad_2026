@@ -40,3 +40,9 @@ print(df.columns)
 print(df.info())
 
 print("Data cleaned successfully")
+
+# DATA TRANSFORMATION
+
+# Create revenue column
+df['revenue'] = df['quantity'] * df['price']
+logging.info("Revenue column created")

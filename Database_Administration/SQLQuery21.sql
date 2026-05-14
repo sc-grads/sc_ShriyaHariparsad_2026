@@ -1,0 +1,3 @@
+BACKUP DATABASE [AdventureWorks2025] TO  DISK = N'C:\SQL_BACKUPS\AdventureWorks2025_14052026.bak' WITH NOFORMAT, NOINIT,  
+NAME = N'AdventureWorks2025-Full Database Backup', SKIP, NOREWIND, NOUNLOAD,  STATS = 10
+GO

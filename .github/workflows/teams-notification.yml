@@ -1,0 +1,89 @@
+name: GitHub to Teams Notifications
+ 
+on:
+
+  pull_request:
+
+    types: [opened, reopened, closed, synchronize]
+
+  push:
+
+    branches:
+
+      - "main"
+
+  create:
+ 
+jobs:
+
+  notify:
+
+    runs-on: ubuntu-latest
+ 
+    steps:
+
+      - name: Send Teams notification
+
+        run: |
+
+          EVENT="${{ github.event_name }}"
+
+          ACTION="${{ github.event.action }}"
+
+          TEXT=""
+ 
+          if [ "$EVENT" = "pull_request" ]; then
+ 
+            if [ "$ACTION" = "opened" ]; then
+
+              TEXT="New Pull Request Opened"
+
+            elif [ "$ACTION" = "reopened" ]; then
+
+              TEXT="Pull Request Reopened"
+
+            elif [ "$ACTION" = "synchronize" ]; then
+
+              TEXT="Pull Request Updated"
+
+            elif [ "$ACTION" = "closed" ]; then
+
+              if [ "${{ github.event.pull_request.merged }}" = "true" ]; then
+
+                TEXT="Pull Request Merged into main"
+
+              else
+
+                TEXT="Pull Request Closed (not merged)"
+
+              fi
+
+            fi
+ 
+            DETAILS="Repo: ${{ github.repository }} | Title: ${{ github.event.pull_request.title }} | Author: ${{ github.actor }}"
+ 
+          elif [ "$EVENT" = "push" ]; then
+
+            TEXT="Push to ${{ github.ref_name }}"
+
+            DETAILS="Repo: ${{ github.repository }} | Commit: ${{ github.sha }}"
+ 
+          elif [ "$EVENT" = "create" ]; then
+
+            TEXT="New Branch Created: ${{ github.ref_name }}"
+
+            DETAILS="Repo: ${{ github.repository }}"
+ 
+          fi
+ 
+          PAYLOAD=$(jq -n --arg text "$TEXT" --arg details "$DETAILS" \
+
+          '{text: ($text + "\n" + $details)}')
+ 
+          curl -H "Content-Type: application/json" \
+
+          -d "$PAYLOAD" \
+
+          ${{ secrets.TEAMS_WEBHOOK_URL }}
+ 
+ 

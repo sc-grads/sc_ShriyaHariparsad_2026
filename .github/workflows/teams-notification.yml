@@ -14,50 +14,42 @@ jobs:
 
     steps:
       - name: Send Teams notification
-        env:
-          EVENT: ${{ github.event_name }}
-          ACTION: ${{ github.event.action }}
-          IS_MERGED: ${{ github.event.pull_request.merged }}
-          REPO: ${{ github.repository }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          ACTOR: ${{ github.actor }}
-          REF_NAME: ${{ github.ref_name }}
-          COMMIT_SHA: ${{ github.sha }}
         run: |
+          EVENT="${{ github.event_name }}"
+          ACTION="${{ github.event.action }}"
           TEXT=""
-          DETAILS=""
 
           if [ "$EVENT" = "pull_request" ]; then
-            if [ "$ACTION" = "opened" ]; then TEXT="New Pull Request Opened"; fi
-            if [ "$ACTION" = "reopened" ]; then TEXT="Pull Request Reopened"; fi
-            if [ "$ACTION" = "synchronize" ]; then TEXT="Pull Request Updated"; fi
-            if [ "$ACTION" = "closed" ]; then
-              if [ "$IS_MERGED" = "true" ]; then
+
+            if [ "$ACTION" = "opened" ]; then
+              TEXT="New Pull Request Opened"
+            elif [ "$ACTION" = "reopened" ]; then
+              TEXT="Pull Request Reopened"
+            elif [ "$ACTION" = "synchronize" ]; then
+              TEXT="Pull Request Updated"
+            elif [ "$ACTION" = "closed" ]; then
+              if [ "${{ github.event.pull_request.merged }}" = "true" ]; then
                 TEXT="Pull Request Merged into main"
               else
                 TEXT="Pull Request Closed (not merged)"
               fi
             fi
-            DETAILS="Repo: $REPO | Title: $PR_TITLE | Author: $ACTOR"
+
+            DETAILS="Repo: ${{ github.repository }} | Title: ${{ github.event.pull_request.title }} | Author: ${{ github.actor }}"
 
           elif [ "$EVENT" = "push" ]; then
-            TEXT="Push to $REF_NAME"
-            DETAILS="Repo: $REPO | Commit: $COMMIT_SHA"
+            TEXT="Push to ${{ github.ref_name }}"
+            DETAILS="Repo: ${{ github.repository }} | Commit: ${{ github.sha }}"
 
           elif [ "$EVENT" = "create" ]; then
-            TEXT="New Branch Created: $REF_NAME"
-            DETAILS="Repo: $REPO"
+            TEXT="New Branch Created: ${{ github.ref_name }}"
+            DETAILS="Repo: ${{ github.repository }}"
+
           fi
 
-          # Standard default Power Automate parsing JSON structure
-          PAYLOAD=$(jq -n \
-            --arg text "$TEXT" \
-            --arg details "$DETAILS" \
-            '{title: $text, text: $details}')
+          PAYLOAD=$(jq -n --arg text "$TEXT" --arg details "$DETAILS" \
+          '{text: ($text + "\n" + $details)}')
 
-          # Executing curl with "-i" to track precise server response codes
-          curl -i -H "Content-Type: application/json" \
-               -d "$PAYLOAD" \
-               "${{ secrets.TEAMS_WEBHOOK_URL }}"
-
- 
+          curl -H "Content-Type: application/json" \
+          -d "$PAYLOAD" \
+          ${{ secrets.Teams_webhook_URL }}

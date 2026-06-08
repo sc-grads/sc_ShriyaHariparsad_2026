@@ -3,6 +3,8 @@ name: GitHub to Teams Notifications
 on:
   pull_request:
     types: [opened, reopened, closed, synchronize]
+  pull_request_review:
+    types: [submitted]
   push:
     branches:
       - "main"
@@ -17,11 +19,11 @@ jobs:
         run: |
           EVENT="${{ github.event_name }}"
           ACTION="${{ github.event.action }}"
+          REVIEW_STATE="${{ github.event.review.state }}"
           TEXT=""
           DETAILS=""
 
           if [ "$EVENT" = "pull_request" ]; then
-
             if [ "$ACTION" = "opened" ]; then
               TEXT="New Pull Request Opened"
             elif [ "$ACTION" = "reopened" ]; then
@@ -35,17 +37,31 @@ jobs:
                 TEXT="Pull Request Closed (not merged)"
               fi
             fi
-
             DETAILS="Repo: ${{ github.repository }} | Title: ${{ github.event.pull_request.title }} | Author: ${{ github.actor }}"
+
+          elif [ "$EVENT" = "pull_request_review" ]; then
+            # Only send notification if the review is an approval
+            if [ "$REVIEW_STATE" = "approved" ]; then
+              TEXT="Pull Request Approved"
+              DETAILS="Repo: ${{ github.repository }} | Title: ${{ github.event.pull_request.title }} | Approved By: ${{ github.actor }}"
+            else
+              echo "Review state is $REVIEW_STATE, not approved. Skipping notification."
+              exit 0
+            fi
 
           elif [ "$EVENT" = "push" ]; then
             TEXT="Push to ${{ github.ref_name }}"
             DETAILS="Repo: ${{ github.repository }} | Commit: ${{ github.sha }}"
 
           elif [ "$EVENT" = "create" ]; then
-            TEXT="New Branch Created: ${{ github.ref_name }}"
-            DETAILS="Repo: ${{ github.repository }}"
-
+            # Verify the created resource is a branch, not a tag
+            if [ "${{ github.event.ref_type }}" = "branch" ]; then
+              TEXT="New Branch Created: ${{ github.ref_name }}"
+              DETAILS="Repo: ${{ github.repository }} | Created By: ${{ github.actor }}"
+            else
+              echo "Created resource is a tag, not a branch. Skipping notification."
+              exit 0
+            fi
           fi
 
           # Re-engineered payload to build a valid Microsoft Adaptive Card structure
@@ -75,9 +91,10 @@ jobs:
               }
             ]
           }')
-
-          # Executing curl request with double quotes around the secret URL
+          
+          # Send the final payload to your Microsoft Teams Webhook
           curl -H "Content-Type: application/json" \
-          -d "$PAYLOAD" \
-          "${{ secrets.TEAMS_WEBHOOK_URL }}"
+               -d "$PAYLOAD" \
+               "${{ secrets.TEAMS_WEBHOOK_URL }}"
+
 

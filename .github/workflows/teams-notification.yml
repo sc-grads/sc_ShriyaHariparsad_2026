@@ -64,7 +64,7 @@ jobs:
             fi
           fi
 
-          # Re-engineered payload to build a valid Microsoft Adaptive Card structure
+          # Re-engineered payload with fixed schema URL validation path
           PAYLOAD=$(jq -n --arg text "$TEXT" --arg details "$DETAILS" '{
             "type": "message",
             "attachments": [
@@ -96,5 +96,3 @@ jobs:
           curl -H "Content-Type: application/json" \
                -d "$PAYLOAD" \
                "${{ secrets.TEAMS_WEBHOOK_URL }}"
-
-

@@ -64,7 +64,7 @@ jobs:
             fi
           fi
 
-          # Universal layout compatible with Power Automate Workflows & Adaptive Cards 1.4+
+          # Re-engineered payload to build a valid Microsoft Adaptive Card structure
           PAYLOAD=$(jq -n --arg text "$TEXT" --arg details "$DETAILS" '{
             "type": "message",
             "attachments": [
@@ -72,8 +72,6 @@ jobs:
                 "contentType": "application/vnd.microsoft.card.adaptive",
                 "content": {
                   "type": "AdaptiveCard",
-                  "$schema": "http://adaptivecards.io",
-                  "version": "1.4",
                   "body": [
                     {
                       "type": "TextBlock",
@@ -86,19 +84,17 @@ jobs:
                       "text": $details,
                       "wrap": true
                     }
-                  ]
+                  ],
+                  "$schema": "http://adaptivecards.io",
+                  "version": "1.4"
                 }
               }
             ]
           }')
           
-          # Execute request and display execution details to catch platform blocks
-          echo "=== Sending Payload ==="
-          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-               -H "Content-Type: application/json" \
+          # Send the final payload to your Microsoft Teams Webhook
+          curl -H "Content-Type: application/json" \
                -d "$PAYLOAD" \
-               "${{ secrets.TEAMS_WEBHOOK_URL }}")
-               
-          echo "=== Teams Platform Response ==="
-          echo "$RESPONSE"
-          echo "==============================="
+               "${{ secrets.TEAMS_WEBHOOK_URL }}"
+
+

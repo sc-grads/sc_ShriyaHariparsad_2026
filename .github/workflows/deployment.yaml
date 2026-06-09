@@ -1,24 +1,24 @@
-name: Deploy Database
- 
 on:
+  workflow_dispatch: # Allows you to manually trigger the deployment from the GitHub Actions tab.
   push:
     branches:
-      - main
+      - main       # Triggers automatically when changes are pushed to the main branch.
  
 jobs:
-  deploy:
+  deploy-database:
     runs-on: windows-latest
  
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code Repository
         uses: actions/checkout@v4
- 
-      - name: Install SQLCMD
-        uses: potatoqualitee/mssqlsuite@v1.7
-        with:
-          install: sqlclient
- 
+        
       - name: Execute SQL Script
         shell: powershell
         run: |
-          sqlcmd -S "${{ secrets.PROJECT_URL }}" -d "${{ secrets.DATABASE_NAME }}" -U "${{ secrets.USER_NAME }}" -P "${{ secrets.PASSWORD_SQL }}" -C -i "SQL Project\deploy.sql"
+          sqlcmd `
+            -S "${{ secrets.PROJECT_URL }}" `
+            -d "${{ secrets.DATABASE_NAME }}" `
+            -U "${{ secrets.USER_NAME }}" `
+            -P "${{ secrets.PASSWORD_SQL }}" `
+            -C `
+            -i "SQL Project/deploy.sql"

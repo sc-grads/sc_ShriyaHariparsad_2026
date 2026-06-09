@@ -93,7 +93,7 @@ jobs:
           }')
           
           # Send the final payload to your Microsoft Teams Webhook
-          curl -H "Content-Type: application/json" \
+          curl -X POST -H "Content-Type: application/json" \
                -d "$PAYLOAD" \
                "${{ secrets.TEAMS_WEBHOOK_URL }}"
 

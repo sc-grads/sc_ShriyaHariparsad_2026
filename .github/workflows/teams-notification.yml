@@ -64,31 +64,41 @@ jobs:
             fi
           fi
 
-          # Re-engineered payload directly targeting New Teams Power Automate Workflows
+          # Universal layout compatible with Power Automate Workflows & Adaptive Cards 1.4+
           PAYLOAD=$(jq -n --arg text "$TEXT" --arg details "$DETAILS" '{
-            "type": "AdaptiveCard",
-            "body": [
+            "type": "message",
+            "attachments": [
               {
-                "type": "TextBlock",
-                "size": "Medium",
-                "weight": "Bolder",
-                "text": $text
-              },
-              {
-                "type": "TextBlock",
-                "text": $details,
-                "wrap": true
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                  "type": "AdaptiveCard",
+                  "$schema": "http://adaptivecards.io",
+                  "version": "1.4",
+                  "body": [
+                    {
+                      "type": "TextBlock",
+                      "size": "Medium",
+                      "weight": "Bolder",
+                      "text": $text
+                    },
+                    {
+                      "type": "TextBlock",
+                      "text": $details,
+                      "wrap": true
+                    }
+                  ]
+                }
               }
-            ],
-            "$schema": "http://adaptivecards.io",
-            "version": "1.4"
+            ]
           }')
           
-          # Send payload and echo output response to catch hidden API errors
-          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -H "Content-Type: application/json" \
+          # Execute request and display execution details to catch platform blocks
+          echo "=== Sending Payload ==="
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+               -H "Content-Type: application/json" \
                -d "$PAYLOAD" \
                "${{ secrets.TEAMS_WEBHOOK_URL }}")
                
-          echo "=== Teams API Output ==="
+          echo "=== Teams Platform Response ==="
           echo "$RESPONSE"
-          echo "========================"
+          echo "==============================="

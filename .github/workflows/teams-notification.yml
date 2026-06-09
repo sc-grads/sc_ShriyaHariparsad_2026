@@ -16,14 +16,20 @@ jobs:
 
     steps:
       - name: Send Teams notification
+        shell: bash
+        env:
+          # Mapping the secret here isolates it from inline command parsing bugs
+          RAW_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK_URL }}
         run: |
+          set -euo pipefail
+
           EVENT="${{ github.event_name }}"
-          ACTION="${{ github.event.action }}"
-          REVIEW_STATE="${{ github.event.review.state }}"
           TEXT=""
           DETAILS=""
 
           if [ "$EVENT" = "pull_request" ]; then
+            ACTION="${{ github.event.action }}"
+
             if [ "$ACTION" = "opened" ]; then
               TEXT="New Pull Request Opened"
             elif [ "$ACTION" = "reopened" ]; then
@@ -37,62 +43,71 @@ jobs:
                 TEXT="Pull Request Closed (not merged)"
               fi
             fi
+
             DETAILS="Repo: ${{ github.repository }} | Title: ${{ github.event.pull_request.title }} | Author: ${{ github.actor }}"
 
           elif [ "$EVENT" = "pull_request_review" ]; then
-            # Only send notification if the review is an approval
-            if [ "$REVIEW_STATE" = "approved" ]; then
-              TEXT="Pull Request Approved"
-              DETAILS="Repo: ${{ github.repository }} | Title: ${{ github.event.pull_request.title }} | Approved By: ${{ github.actor }}"
-            else
-              echo "Review state is $REVIEW_STATE, not approved. Skipping notification."
+            REVIEW_STATE="${{ github.event.review.state }}"
+
+            if [ "$REVIEW_STATE" != "approved" ]; then
+              echo "Review state is $REVIEW_STATE. Skipping notification."
               exit 0
             fi
+
+            TEXT="Pull Request Approved"
+            DETAILS="Repo: ${{ github.repository }} | Title: ${{ github.event.pull_request.title }} | Approved By: ${{ github.actor }}"
 
           elif [ "$EVENT" = "push" ]; then
             TEXT="Push to ${{ github.ref_name }}"
             DETAILS="Repo: ${{ github.repository }} | Commit: ${{ github.sha }}"
 
           elif [ "$EVENT" = "create" ]; then
-            # Verify the created resource is a branch, not a tag
-            if [ "${{ github.event.ref_type }}" = "branch" ]; then
-              TEXT="New Branch Created: ${{ github.ref_name }}"
-              DETAILS="Repo: ${{ github.repository }} | Created By: ${{ github.actor }}"
-            else
-              echo "Created resource is a tag, not a branch. Skipping notification."
+            REF_TYPE="${{ github.event.ref_type }}"
+            REF="${{ github.event.ref }}"
+
+            if [ "$REF_TYPE" != "branch" ]; then
+              echo "Not a branch creation. Skipping notification."
               exit 0
             fi
+
+            TEXT="New Branch Created: $REF"
+            DETAILS="Repo: ${{ github.repository }} | Created By: ${{ github.actor }}"
           fi
 
-          # Re-engineered payload to build a valid Microsoft Adaptive Card structure
+          # Generate the Adaptive Card structure safely inside jq
           PAYLOAD=$(jq -n --arg text "$TEXT" --arg details "$DETAILS" '{
-            "type": "message",
-            "attachments": [
+            type: "message",
+            attachments: [
               {
-                "contentType": "application/vnd.microsoft.card.adaptive",
-                "content": {
-                  "type": "AdaptiveCard",
-                  "body": [
+                contentType: "application/vnd.microsoft.card.adaptive",
+                content: {
+                  type: "AdaptiveCard",
+                  version: "1.4",
+                  body: [
                     {
-                      "type": "TextBlock",
-                      "size": "Medium",
-                      "weight": "Bolder",
-                      "text": $text
+                      type: "TextBlock",
+                      size: "Medium",
+                      weight: "Bolder",
+                      text: $text
                     },
                     {
-                      "type": "TextBlock",
-                      "text": $details,
-                      "wrap": true
+                      type: "TextBlock",
+                      text: $details,
+                      wrap: true
                     }
-                  ],
-                  "$schema": "http://adaptivecards.io",
-                  "version": "1.4"
+                  ]
                 }
               }
             ]
           }')
-          
-          # Send the final payload to your Microsoft Teams Webhook
-          curl -H "Content-Type: application/json" \
-               -d "$PAYLOAD" \
-               "${{ secrets.TEAMS_WEBHOOK_URL }}"
+
+          # Use xargs to safely clean whitespace/newlines out of the environment variable
+          CLEAN_URL=$(echo "$RAW_WEBHOOK" | xargs)
+
+          if [ -z "$CLEAN_URL" ] || [ "$CLEAN_URL" = "null" ]; then
+            echo "ERROR: TEAMS_WEBHOOK_URL variable could not be resolved."
+            exit 1
+          fi
+
+          # Dispatch payload explicitly
+          curl -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$CLEAN_URL"

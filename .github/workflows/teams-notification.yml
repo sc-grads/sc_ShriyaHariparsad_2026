@@ -64,35 +64,31 @@ jobs:
             fi
           fi
 
-          # Re-engineered payload with fixed schema URL validation path
+          # Re-engineered payload directly targeting New Teams Power Automate Workflows
           PAYLOAD=$(jq -n --arg text "$TEXT" --arg details "$DETAILS" '{
-            "type": "message",
-            "attachments": [
+            "type": "AdaptiveCard",
+            "body": [
               {
-                "contentType": "application/vnd.microsoft.card.adaptive",
-                "content": {
-                  "type": "AdaptiveCard",
-                  "body": [
-                    {
-                      "type": "TextBlock",
-                      "size": "Medium",
-                      "weight": "Bolder",
-                      "text": $text
-                    },
-                    {
-                      "type": "TextBlock",
-                      "text": $details,
-                      "wrap": true
-                    }
-                  ],
-                  "$schema": "http://adaptivecards.io",
-                  "version": "1.4"
-                }
+                "type": "TextBlock",
+                "size": "Medium",
+                "weight": "Bolder",
+                "text": $text
+              },
+              {
+                "type": "TextBlock",
+                "text": $details,
+                "wrap": true
               }
-            ]
+            ],
+            "$schema": "http://adaptivecards.io",
+            "version": "1.4"
           }')
           
-          # Send the final payload to your Microsoft Teams Webhook
-          curl -H "Content-Type: application/json" \
+          # Send payload and echo output response to catch hidden API errors
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -H "Content-Type: application/json" \
                -d "$PAYLOAD" \
-               "${{ secrets.TEAMS_WEBHOOK_URL }}"
+               "${{ secrets.TEAMS_WEBHOOK_URL }}")
+               
+          echo "=== Teams API Output ==="
+          echo "$RESPONSE"
+          echo "========================"

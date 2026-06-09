@@ -15,14 +15,10 @@ jobs:
  
       - name: Install SQLCMD
         uses: potatoqualitee/mssqlsuite@v1.7
+        with:
+          install: sqlclient
  
       - name: Execute SQL Script
         shell: powershell
         run: |
-          sqlcmd `
-            -S "${{ secrets.PROJECT_URL }}" `
-            -d "${{ secrets.DATABASE_NAME }}" `
-            -U "${{ secrets.USER_NAME }}" `
-            -P "${{ secrets.PASSWORD_SQL }}" `
-            -C `
-            -i "database/deploy.sql"
+          sqlcmd -S "${{ secrets.PROJECT_URL }}" -d "${{ secrets.DATABASE_NAME }}" -U "${{ secrets.USER_NAME }}" -P "${{ secrets.PASSWORD_SQL }}" -C -i "database/deploy.sql"

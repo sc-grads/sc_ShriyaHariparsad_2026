@@ -1,100 +1,49 @@
-name: GitHub to Teams Notifications
-
+name: GitHub-MS Teams Events Integration
+ 
 on:
+  push:
   pull_request:
-    types: [opened, reopened, closed, synchronize]
+    types: [opened, review_requested, closed]
+  create:
   pull_request_review:
     types: [submitted]
-  push:
-    branches:
-      - "main"
-  create:
-
+ 
 jobs:
-  notify:
+  notify-teams:
     runs-on: ubuntu-latest
-
+ 
     steps:
-      - name: Send Teams notification
+      - name: Send message to MS Teams
         run: |
-          EVENT="${{ github.event_name }}"
-          ACTION="${{ github.event.action }}"
-          REVIEW_STATE="${{ github.event.review.state }}"
-          TEXT=""
-          DETAILS=""
-
-          if [ "$EVENT" = "pull_request" ]; then
-            if [ "$ACTION" = "opened" ]; then
-              TEXT="New Pull Request Opened"
-            elif [ "$ACTION" = "reopened" ]; then
-              TEXT="Pull Request Reopened"
-            elif [ "$ACTION" = "synchronize" ]; then
-              TEXT="Pull Request Updated"
-            elif [ "$ACTION" = "closed" ]; then
-              if [ "${{ github.event.pull_request.merged }}" = "true" ]; then
-                TEXT="Pull Request Merged into main"
-              else
-                TEXT="Pull Request Closed (not merged)"
-              fi
-            fi
-            DETAILS="Repo: ${{ github.repository }} | Title: ${{ github.event.pull_request.title }} | Author: ${{ github.actor }}"
-
-          elif [ "$EVENT" = "pull_request_review" ]; then
-            # Only send notification if the review is an approval
-            if [ "$REVIEW_STATE" = "approved" ]; then
-              TEXT="Pull Request Approved"
-              DETAILS="Repo: ${{ github.repository }} | Title: ${{ github.event.pull_request.title }} | Approved By: ${{ github.actor }}"
-            else
-              echo "Review state is $REVIEW_STATE, not approved. Skipping notification."
-              exit 0
-            fi
-
-          elif [ "$EVENT" = "push" ]; then
-            TEXT="Push to ${{ github.ref_name }}"
-            DETAILS="Repo: ${{ github.repository }} | Commit: ${{ github.sha }}"
-
-          elif [ "$EVENT" = "create" ]; then
-            # Verify the created resource is a branch, not a tag
-            if [ "${{ github.event.ref_type }}" = "branch" ]; then
-              TEXT="New Branch Created: ${{ github.ref_name }}"
-              DETAILS="Repo: ${{ github.repository }} | Created By: ${{ github.actor }}"
-            else
-              echo "Created resource is a tag, not a branch. Skipping notification."
-              exit 0
-            fi
+          EVENT_NAME="${{ github.event_name }}"
+ 
+          if [ "$EVENT_NAME" = "push" ]; then
+            MESSAGE=" Push event in ${{ github.repository }} by ${{ github.actor }}.\n\nCommit: ${{ github.event.head_commit.message }}\n${{ github.event.head_commit.url }}"
+         
+          elif [ "$EVENT_NAME" = "create" ]; then
+            MESSAGE=" Create event in ${{ github.repository }} by ${{ github.actor }}.\nRef: ${{ github.ref }}"
+ 
+          elif [ "$EVENT_NAME" = "create" ] && [ "${{ github.ref_type }}" = "branch" ]; then
+            MESSAGE=" New Branch Created in ${{ github.repository }} by ${{ github.actor }}.Branch Name: ${{ github.ref }} Repository: ${{ github.repository }}"  
+         
+          elif [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.action }}" = "opened" ]; then
+            MESSAGE=" Pull Request Created in ${{ github.repository }} by ${{ github.actor }}.\n\nTitle: ${{ github.event.pull_request.title }}\n${{ github.event.pull_request.html_url }}"
+         
+          elif [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.action }}" = "review_requested" ]; then
+            MESSAGE=" Approval Requested in ${{ github.repository }}.\n\nCreated By: ${{ github.event.pull_request.user.login }}\nReviewer: ${{ github.event.requested_reviewer.login }}\nStatus: Review Requested\n${{ github.event.pull_request.html_url }}"
+         
+          elif [ "${{ github.event_name }}" = "pull_request_review" ] && [ "${{ github.event.review.state }}" = "approved" ]; then
+            MESSAGE=" Pull Request Approved in ${{ github.repository }}.\n\nApproved By: ${{ github.actor }}\nPR Author: ${{ github.event.pull_request.user.login }}\nStatus: Approved\n${{ github.event.pull_request.html_url }}"
+         
+          elif [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.action }}" = "closed" ] && [ "${{ github.event.pull_request.merged }}" = "true" ]; then
+            MESSAGE=" Pull Request Merged in ${{ github.repository }}.\n\nMerged By: ${{ github.actor }}\nTitle: ${{ github.event.pull_request.title }}\n${{ github.event.pull_request.html_url }}"
+         
+     
+         
+          else
+            exit 0
           fi
-
-          # Re-engineered payload to build a valid Microsoft Adaptive Card structure
-          PAYLOAD=$(jq -n --arg text "$TEXT" --arg details "$DETAILS" '{
-            "type": "message",
-            "attachments": [
-              {
-                "contentType": "application/vnd.microsoft.card.adaptive",
-                "content": {
-                  "type": "AdaptiveCard",
-                  "body": [
-                    {
-                      "type": "TextBlock",
-                      "size": "Medium",
-                      "weight": "Bolder",
-                      "text": $text
-                    },
-                    {
-                      "type": "TextBlock",
-                      "text": $details,
-                      "wrap": true
-                    }
-                  ],
-                  "$schema": "http://adaptivecards.io",
-                  "version": "1.4"
-                }
-              }
-            ]
-          }')
-          
-          # Send the final payload to your Microsoft Teams Webhook
+ 
           curl -H "Content-Type: application/json" \
-               -d "$PAYLOAD" \
-               "${{ secrets.TEAMS_WEBHOOK_URL }}"
-
-
+          -d "{\"text\": \"$MESSAGE\"}" \
+          "${{ secrets.TEAMS_WEBHOOK }}"

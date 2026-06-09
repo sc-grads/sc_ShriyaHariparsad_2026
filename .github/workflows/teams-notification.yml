@@ -7,7 +7,7 @@ on:
     types: [submitted]
   push:
     branches:
-      - "main"
+      - main
   create:
 
 jobs:
@@ -15,11 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Send Teams notification
+      - name: Send Teams Notification
         shell: bash
         env:
-          # Mapping the secret here isolates it from inline command parsing bugs
           RAW_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
         run: |
           set -euo pipefail
 
@@ -28,6 +28,7 @@ jobs:
           DETAILS=""
 
           if [ "$EVENT" = "pull_request" ]; then
+
             ACTION="${{ github.event.action }}"
 
             if [ "$ACTION" = "opened" ]; then
@@ -37,16 +38,19 @@ jobs:
             elif [ "$ACTION" = "synchronize" ]; then
               TEXT="Pull Request Updated"
             elif [ "$ACTION" = "closed" ]; then
+
               if [ "${{ github.event.pull_request.merged }}" = "true" ]; then
                 TEXT="Pull Request Merged into main"
               else
                 TEXT="Pull Request Closed (not merged)"
               fi
+
             fi
 
             DETAILS="Repo: ${{ github.repository }} | Title: ${{ github.event.pull_request.title }} | Author: ${{ github.actor }}"
 
           elif [ "$EVENT" = "pull_request_review" ]; then
+
             REVIEW_STATE="${{ github.event.review.state }}"
 
             if [ "$REVIEW_STATE" != "approved" ]; then
@@ -58,10 +62,12 @@ jobs:
             DETAILS="Repo: ${{ github.repository }} | Title: ${{ github.event.pull_request.title }} | Approved By: ${{ github.actor }}"
 
           elif [ "$EVENT" = "push" ]; then
+
             TEXT="Push to ${{ github.ref_name }}"
             DETAILS="Repo: ${{ github.repository }} | Commit: ${{ github.sha }}"
 
           elif [ "$EVENT" = "create" ]; then
+
             REF_TYPE="${{ github.event.ref_type }}"
             REF="${{ github.event.ref }}"
 
@@ -72,42 +78,60 @@ jobs:
 
             TEXT="New Branch Created: $REF"
             DETAILS="Repo: ${{ github.repository }} | Created By: ${{ github.actor }}"
+
           fi
 
-          # Generate the Adaptive Card structure safely inside jq
-          PAYLOAD=$(jq -n --arg text "$TEXT" --arg details "$DETAILS" '{
-            type: "message",
-            attachments: [
-              {
-                contentType: "application/vnd.microsoft.card.adaptive",
-                content: {
-                  type: "AdaptiveCard",
-                  version: "1.4",
-                  body: [
-                    {
-                      type: "TextBlock",
-                      size: "Medium",
-                      weight: "Bolder",
-                      text: $text
-                    },
-                    {
-                      type: "TextBlock",
-                      text: $details,
-                      wrap: true
-                    }
-                  ]
-                }
-              }
-            ]
-          }')
+          # Remove hidden CR/LF characters
+          CLEAN_URL=$(printf '%s' "$RAW_WEBHOOK" | tr -d '\r\n')
 
-          # Use xargs to safely clean whitespace/newlines out of the environment variable
-          CLEAN_URL=$(echo "$RAW_WEBHOOK" | xargs)
+          # Debug checks
+          echo "Webhook URL length: ${#CLEAN_URL}"
 
-          if [ -z "$CLEAN_URL" ] || [ "$CLEAN_URL" = "null" ]; then
-            echo "ERROR: TEAMS_WEBHOOK_URL variable could not be resolved."
+          if [ -z "$CLEAN_URL" ]; then
+            echo "ERROR: TEAMS_WEBHOOK_URL is empty."
             exit 1
           fi
 
-          # Dispatch payload explicitly
-          curl -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$CLEAN_URL"
+          if [[ ! "$CLEAN_URL" =~ ^https:// ]]; then
+            echo "ERROR: TEAMS_WEBHOOK_URL does not appear to be a valid HTTPS URL."
+            exit 1
+          fi
+
+          # Build Adaptive Card payload
+          PAYLOAD=$(jq -n \
+            --arg text "$TEXT" \
+            --arg details "$DETAILS" \
+            '{
+              type: "message",
+              attachments: [
+                {
+                  contentType: "application/vnd.microsoft.card.adaptive",
+                  content: {
+                    type: "AdaptiveCard",
+                    version: "1.4",
+                    body: [
+                      {
+                        type: "TextBlock",
+                        size: "Medium",
+                        weight: "Bolder",
+                        text: $text
+                      },
+                      {
+                        type: "TextBlock",
+                        text: $details,
+                        wrap: true
+                      }
+                    ]
+                  }
+                }
+              ]
+            }')
+
+          echo "Sending Teams notification..."
+
+          curl --fail --location --request POST \
+            --header "Content-Type: application/json" \
+            --data "$PAYLOAD" \
+            "$CLEAN_URL"
+
+          echo "Notification sent successfully."

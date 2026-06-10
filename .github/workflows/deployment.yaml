@@ -4,42 +4,40 @@ on:
   push:
     branches:
       - main
+      - staging
+
   workflow_dispatch:
 
 jobs:
 
-  notify-approval:
-    runs-on: windows-latest
-
-    steps:
-      - name: Send Teams Approval Request
-        shell: powershell
-        run: |
-          $payload = @{
-            text = "Database deployment approval required.`nCreator: ${{ github.actor }}`nPlease approve in GitHub Environment: production"
-          } | ConvertTo-Json
-
-          Invoke-RestMethod `
-            -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
-            -Method Post `
-            -Body $payload `
-            -ContentType "application/json"
-
   deploy-database:
-    needs: notify-approval
     runs-on: windows-latest
 
     environment:
-      name: "production, Buhle"
-      
+      name: ${{ github.ref_name == 'main' && 'production' || 'Buhle' }}
 
     steps:
 
-      - name: Notify Approval Received
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Determine Environment
+        id: env
         shell: powershell
         run: |
+          if ("${{ github.ref_name }}" -eq "main") {
+            echo "ENV_NAME=production" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "ENV_NAME=Buhle" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Send Approval Request Notification (Teams)
+        shell: powershell
+        run: |
+          $envName = "${{ steps.env.outputs.ENV_NAME }}"
+
           $payload = @{
-            text = "Approval received.`nCreator: ${{ github.actor }}`nDeployment is starting now."
+            text = "APPROVAL REQUIRED 🚨`nBranch: ${{ github.ref_name }}`nEnvironment: $envName`nPlease approve in GitHub Environments"
           } | ConvertTo-Json
 
           Invoke-RestMethod `
@@ -47,9 +45,6 @@ jobs:
             -Method Post `
             -Body $payload `
             -ContentType "application/json"
-
-      - name: Checkout Code Repository
-        uses: actions/checkout@v4
 
       - name: Execute SQL Script
         shell: powershell
@@ -62,12 +57,14 @@ jobs:
             -C `
             -i "SQL Project/deploy.sql"
 
-      - name: Notify Teams on Success
+      - name: Notify Success
         if: success()
         shell: powershell
         run: |
+          $envName = "${{ steps.env.outputs.ENV_NAME }}"
+
           $payload = @{
-            text = "SUCCESS: Database deployment completed.`nCreator: ${{ github.actor }}"
+            text = "SUCCESS Branch: ${{ github.ref_name }}`nEnvironment: $envName"
           } | ConvertTo-Json
 
           Invoke-RestMethod `
@@ -76,12 +73,14 @@ jobs:
             -Body $payload `
             -ContentType "application/json"
 
-      - name: Notify Teams on Failure
+      - name: Notify Failure
         if: failure()
         shell: powershell
         run: |
+          $envName = "${{ steps.env.outputs.ENV_NAME }}"
+
           $payload = @{
-            text = "FAILED: Database deployment failed.`nCreator: ${{ github.actor }}"
+            text = "FAILED Branch: ${{ github.ref_name }}`nEnvironment: $envName"
           } | ConvertTo-Json
 
           Invoke-RestMethod `

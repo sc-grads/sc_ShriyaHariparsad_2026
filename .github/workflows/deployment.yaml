@@ -7,16 +7,14 @@ on:
   workflow_dispatch:
 
 jobs:
-
   notify-approval:
     runs-on: windows-latest
-
     steps:
       - name: Send Teams Approval Request
         shell: powershell
         run: |
           $payload = @{
-            text = "Database deployment approval required. Please approve the production deployment in GitHub."
+            text = "Database deployment approval required. Please review and approve the production deployment in GitHub."
           } | ConvertTo-Json
 
           Invoke-RestMethod `
@@ -27,11 +25,9 @@ jobs:
 
   deploy-database:
     needs: notify-approval
-
     runs-on: windows-latest
-
     environment:
-      name: production
+      name: production # Ensure this environment in GitHub has "Required reviewers" enabled.
 
     steps:
       - name: Checkout Code Repository
@@ -47,3 +43,31 @@ jobs:
             -P "${{ secrets.PASSWORD_SQL }}" `
             -C `
             -i "SQL Project/deploy.sql"
+
+      - name: Notify Teams on Success
+        if: success()
+        shell: powershell
+        run: |
+          $payload = @{
+            text = "✅ Database deployment completed successfully!"
+          } | ConvertTo-Json
+
+          Invoke-RestMethod `
+            -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+            -Method Post `
+            -Body $payload `
+            -ContentType "application/json"
+
+      - name: Notify Teams on Failure
+        if: failure()
+        shell: powershell
+        run: |
+          $payload = @{
+            text = "❌ Database deployment failed. Please check the GitHub Actions logs."
+          } | ConvertTo-Json
+
+          Invoke-RestMethod `
+            -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+            -Method Post `
+            -Body $payload `
+            -ContentType "application/json"

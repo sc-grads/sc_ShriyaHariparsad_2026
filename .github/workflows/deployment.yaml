@@ -55,7 +55,6 @@ jobs:
         run: |
           sqlcmd `
             -S "${{ secrets.PROJECT_URL }}" `
-            - "master" `
             -d "${{ secrets.DATABASE_NAME }}" `
             -U "${{ secrets.USER_NAME }}" `
             -P "${{ secrets.PASSWORD_SQL }}" `

@@ -1,3 +1,14 @@
+-- Check and create the database first
+IF NOT EXISTS (
+    SELECT name 
+    FROM sys.databases 
+    WHERE name = 'ProjectDB1'
+)
+BEGIN
+    CREATE DATABASE ProjectDB1;
+END
+GO
+
 -- Switch to the database
 USE ProjectDB1;
 GO
@@ -42,4 +53,5 @@ GO
 -- Verify deployment
 SELECT * FROM Employees;
 GO
+
 

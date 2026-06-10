@@ -9,21 +9,35 @@ on:
   workflow_dispatch:
 
 jobs:
+
   deploy-database:
     runs-on: windows-latest
 
-    # 🌟 THIS SECURELY FORCES GITHUB TO FETCH THE CORRECT ENVIROMENT SECRETS IMMEDIATELY
-    environment: ${{ github.ref_name == 'main' && 'production' || 'Buhle' }}
+    environment:
+      name: ${{ github.ref_name == 'main' && 'production' || 'Buhle' }}
 
     steps:
+
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Determine Environment
+        id: env
+        shell: powershell
+        run: |
+          if ("${{ github.ref_name }}" -eq "main") {
+            echo "ENV_NAME=production" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "ENV_NAME=Buhle" >> $env:GITHUB_OUTPUT
+          }
 
       - name: Send Approval Request Notification (Teams)
         shell: powershell
         run: |
+          $envName = "${{ steps.env.outputs.ENV_NAME }}"
+
           $payload = @{
-            text = "APPROVAL REQUESTED 🚨`nBranch: ${{ github.ref_name }}`nEnvironment: ${{ github.ref_name == 'main' && 'production' || 'Buhle' }}`nPlease verify details in GitHub Environments."
+            text = "APPROVAL REQUIRED 🚨`nBranch: ${{ github.ref_name }}`nEnvironment: $envName`nPlease approve in GitHub Environments"
           } | ConvertTo-Json
 
           Invoke-RestMethod `
@@ -36,7 +50,7 @@ jobs:
         shell: powershell
         run: |
           sqlcmd `
-            -S "${{ secrets.SERVER_SQL }}" `
+            -S "${{ secrets.PROJECT_URL }}" `
             -d "master" `
             -U "${{ secrets.USER_NAME }}" `
             -P "${{ secrets.PASSWORD_SQL }}" `
@@ -47,8 +61,10 @@ jobs:
         if: success()
         shell: powershell
         run: |
+          $envName = "${{ steps.env.outputs.ENV_NAME }}"
+
           $payload = @{
-            text = "SUCCESS`nBranch: ${{ github.ref_name }}`nTarget Database updated successfully."
+            text = "SUCCESS Branch: ${{ github.ref_name }}`nEnvironment: $envName"
           } | ConvertTo-Json
 
           Invoke-RestMethod `
@@ -61,8 +77,10 @@ jobs:
         if: failure()
         shell: powershell
         run: |
+          $envName = "${{ steps.env.outputs.ENV_NAME }}"
+
           $payload = @{
-            text = "FAILED ❌`nBranch: ${{ github.ref_name }}`nPlease check execution logs for connection blocks."
+            text = "FAILED Branch: ${{ github.ref_name }}`nEnvironment: $envName"
           } | ConvertTo-Json
 
           Invoke-RestMethod `

@@ -7,14 +7,16 @@ on:
   workflow_dispatch:
 
 jobs:
+
   notify-approval:
     runs-on: windows-latest
+
     steps:
       - name: Send Teams Approval Request
         shell: powershell
         run: |
           $payload = @{
-            text = "Database deployment approval required. Please review and approve the production deployment in GitHub."
+            text = "Database deployment approval required.`nCreator: ${{ github.actor }}`nPlease approve in GitHub Environment: production"
           } | ConvertTo-Json
 
           Invoke-RestMethod `
@@ -26,10 +28,25 @@ jobs:
   deploy-database:
     needs: notify-approval
     runs-on: windows-latest
+
     environment:
-      name: production # Ensure this environment in GitHub has "Required reviewers" enabled.
+      name: production
 
     steps:
+
+      - name: Notify Approval Received
+        shell: powershell
+        run: |
+          $payload = @{
+            text = "Approval received.`nCreator: ${{ github.actor }}`nDeployment is starting now."
+          } | ConvertTo-Json
+
+          Invoke-RestMethod `
+            -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+            -Method Post `
+            -Body $payload `
+            -ContentType "application/json"
+
       - name: Checkout Code Repository
         uses: actions/checkout@v4
 
@@ -49,7 +66,7 @@ jobs:
         shell: powershell
         run: |
           $payload = @{
-            text = "Database deployment completed successfully!"
+            text = "SUCCESS: Database deployment completed.`nCreator: ${{ github.actor }}"
           } | ConvertTo-Json
 
           Invoke-RestMethod `
@@ -63,7 +80,7 @@ jobs:
         shell: powershell
         run: |
           $payload = @{
-            text = "Database deployment failed. Please check the GitHub Actions logs."
+            text = "FAILED: Database deployment failed.`nCreator: ${{ github.actor }}"
           } | ConvertTo-Json
 
           Invoke-RestMethod `

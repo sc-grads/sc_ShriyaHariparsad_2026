@@ -1,17 +1,42 @@
+name: Database Deployment
+
 on:
-  workflow_dispatch: # Allows you to manually trigger the deployment from the GitHub Actions tab.
   push:
     branches:
-      - main       # Triggers automatically when changes are pushed to the main branch.
- 
+      - main
+  workflow_dispatch:
+
 jobs:
-  deploy-database:
+
+  notify-approval:
     runs-on: windows-latest
- 
+
+    steps:
+      - name: Send Teams Approval Request
+        shell: powershell
+        run: |
+          $payload = @{
+            text = "Database deployment approval required. Please approve the production deployment in GitHub."
+          } | ConvertTo-Json
+
+          Invoke-RestMethod `
+            -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+            -Method Post `
+            -Body $payload `
+            -ContentType "application/json"
+
+  deploy-database:
+    needs: notify-approval
+
+    runs-on: windows-latest
+
+    environment:
+      name: production
+
     steps:
       - name: Checkout Code Repository
         uses: actions/checkout@v4
-        
+
       - name: Execute SQL Script
         shell: powershell
         run: |

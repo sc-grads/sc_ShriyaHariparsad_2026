@@ -50,7 +50,7 @@ jobs:
         shell: powershell
         run: |
           sqlcmd `
-            -S "${{ secrets.PROJECT_URL }}" `
+            -S "${{ secrets.SERVER_SQL }}" `
             -d "master" `
             -U "${{ secrets.USER_NAME }}" `
             -P "${{ secrets.PASSWORD_SQL }}" `

@@ -49,7 +49,7 @@ jobs:
         shell: powershell
         run: |
           $payload = @{
-            text = "✅ Database deployment completed successfully!"
+            text = "Database deployment completed successfully!"
           } | ConvertTo-Json
 
           Invoke-RestMethod `
@@ -63,7 +63,7 @@ jobs:
         shell: powershell
         run: |
           $payload = @{
-            text = "❌ Database deployment failed. Please check the GitHub Actions logs."
+            text = "Database deployment failed. Please check the GitHub Actions logs."
           } | ConvertTo-Json
 
           Invoke-RestMethod `

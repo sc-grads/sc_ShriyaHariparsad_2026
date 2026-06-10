@@ -1,4 +1,4 @@
--- Check and create the database first
+-- Check and create the database first while connected to master
 IF NOT EXISTS (
     SELECT name 
     FROM sys.databases 
@@ -9,7 +9,7 @@ BEGIN
 END
 GO
 
--- Switch to the database
+-- Switch to the newly created or existing database
 USE Cloud_Tunnels_SH;
 GO
  
@@ -54,5 +54,6 @@ GO
 -- Verify deployment
 SELECT * FROM Employees;
 GO
+
 
 

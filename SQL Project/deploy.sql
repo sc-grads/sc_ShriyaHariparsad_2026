@@ -2,15 +2,15 @@
 IF NOT EXISTS (
     SELECT name 
     FROM sys.databases 
-    WHERE name = 'ProjectDB1'
+    WHERE name = 'Cloud_Tunnels_SH'
 )
 BEGIN
-    CREATE DATABASE ProjectDB1;
+    CREATE DATABASE Cloud_Tunnels_SH;
 END
 GO
 
 -- Switch to the database
-USE ProjectDB1;
+USE Cloud_Tunnels_SH;
 GO
  
 -- Create Employees table if it doesn't exist
@@ -44,6 +44,7 @@ BEGIN
         Email
     )
     VALUES
+    ('Shriya', 'Hariparsad', 'shriya.hariparsad@email.com'),
     ('John', 'Smith', 'john.smith@email.com'),
     ('Sarah', 'Jones', 'sarah.jones@email.com'),
     ('David', 'Brown', 'david.brown@email.com');

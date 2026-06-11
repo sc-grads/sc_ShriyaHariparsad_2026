@@ -1,12 +1,16 @@
-name: Database Deployment
+name: Database Deployment Template
 
 on:
-  push:
-    branches:
-      - main
-      - staging
-
-  workflow_dispatch:
+  workflow_call:
+    secrets:
+      PROJECT_URL:
+        required: true
+      USER_NAME:
+        required: true
+      PASSWORD_SQL:
+        required: true
+      TEAMS_WEBHOOK_URL:
+        required: true
 
 jobs:
 
@@ -31,19 +35,15 @@ jobs:
             echo "ENV_NAME=Buhle" >> $env:GITHUB_OUTPUT
           }
 
-      #  ONLY RUNS ON STAGING NOW
-      - name: Send Approval Request Notification (Teams)
+      - name: Send Approval Request (Teams)
         if: github.ref_name == 'staging'
         shell: powershell
         run: |
-          $envName = "${{ steps.env.outputs.ENV_NAME }}"
-
           $payload = @{
-            text = " DATABASE DEPLOYMENT APPROVAL REQUIRED`n`n Requested by: Shriya`n Branch: ${{ github.ref_name }}`n Environment: $envName`n Time: $(Get-Date)`n`n Action Required: Please approve this deployment."
+            text = "DATABASE DEPLOYMENT APPROVAL REQUIRED`n`nBranch: ${{ github.ref_name }}`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`nTime: $(Get-Date)"
           } | ConvertTo-Json
 
-          Invoke-RestMethod `
-            -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+          Invoke-RestMethod -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
             -Method Post `
             -Body $payload `
             -ContentType "application/json"
@@ -63,14 +63,11 @@ jobs:
         if: success()
         shell: powershell
         run: |
-          $envName = "${{ steps.env.outputs.ENV_NAME }}"
-
           $payload = @{
-            text = " DEPLOYMENT SUCCESSFUL`n`n Deployed by: Shriya`n Branch: ${{ github.ref_name }}`n Environment: $envName`n Time: $(Get-Date)`n`n Database deployed successfully."
+            text = "DEPLOYMENT SUCCESSFUL`n`nBranch: ${{ github.ref_name }}`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`nTime: $(Get-Date)"
           } | ConvertTo-Json
 
-          Invoke-RestMethod `
-            -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+          Invoke-RestMethod -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
             -Method Post `
             -Body $payload `
             -ContentType "application/json"
@@ -79,14 +76,11 @@ jobs:
         if: failure()
         shell: powershell
         run: |
-          $envName = "${{ steps.env.outputs.ENV_NAME }}"
-
           $payload = @{
-            text = " DEPLOYMENT FAILED`n`n Triggered by: Shriya`n Branch: ${{ github.ref_name }}`n Environment: $envName`n Time: $(Get-Date)`n`n Please check GitHub Actions logs for error details."
+            text = "DEPLOYMENT FAILED`n`nBranch: ${{ github.ref_name }}`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`nTime: $(Get-Date)"
           } | ConvertTo-Json
 
-          Invoke-RestMethod `
-            -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+          Invoke-RestMethod -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
             -Method Post `
             -Body $payload `
             -ContentType "application/json"

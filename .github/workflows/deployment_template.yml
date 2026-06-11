@@ -40,7 +40,7 @@ jobs:
         shell: powershell
         run: |
           $payload = @{
-            text = "PARTNER DATABASE DEPLOYMENT - APPROVAL REQUIRED`n`nCreator: Shriya`n`nBranch: ${{ github.ref_name }}`n`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`n`nDate/Time: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`n`nApproval required before deployment."
+            text = "PARTNER DATABASE DEPLOYMENT - APPROVAL REQUIRED`n`nCreator: Shriya`n`nBranch: ${{ github.ref_name }}`n`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`n`nDate: $(Get-Date -Format 'yyyy-MM-dd')`n`nApproval required before deployment."
           } | ConvertTo-Json
 
           Invoke-RestMethod -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `

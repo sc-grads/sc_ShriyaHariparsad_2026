@@ -1,0 +1,15 @@
+name: Main Database Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+
+  workflow_dispatch:
+
+jobs:
+
+  deploy:
+    uses: ./.github/workflows/deployment_template.yml
+    secrets: inherit

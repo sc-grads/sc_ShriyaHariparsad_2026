@@ -34,10 +34,8 @@ jobs:
       - name: Send Approval Request Notification (Teams)
         shell: powershell
         run: |
-          $envName = "${{ steps.env.outputs.ENV_NAME }}"
-
           $payload = @{
-            text = "APPROVAL REQUIRED 🚨`nBranch: ${{ github.ref_name }}`nEnvironment: $envName`nPlease approve in GitHub Environments"
+            text = "APPROVAL REQUIRED `nBranch: ${{ github.ref_name }}`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`nPlease approve in GitHub Environments"
           } | ConvertTo-Json
 
           Invoke-RestMethod `
@@ -46,25 +44,32 @@ jobs:
             -Body $payload `
             -ContentType "application/json"
 
-      - name: Execute SQL Script
+      - name: Debug Connection
+        shell: powershell
+        run: |
+          Write-Host "Branch: ${{ github.ref_name }}"
+          Write-Host "Environment: ${{ steps.env.outputs.ENV_NAME }}"
+          Write-Host "Server: ${{ secrets.PROJECT_URL }}"
+          Write-Host "Database: ${{ secrets.DATABASE_NAME }}"
+
+      - name: Execute SQL Deployment
         shell: powershell
         run: |
           sqlcmd `
             -S "${{ secrets.PROJECT_URL }}" `
-            -d "master" `
+            -d "${{ secrets.DATABASE_NAME }}" `
             -U "${{ secrets.USER_NAME }}" `
             -P "${{ secrets.PASSWORD_SQL }}" `
             -C `
+            -b `
             -i "SQL Project/deploy.sql"
 
       - name: Notify Success
         if: success()
         shell: powershell
         run: |
-          $envName = "${{ steps.env.outputs.ENV_NAME }}"
-
           $payload = @{
-            text = "SUCCESS Branch: ${{ github.ref_name }}`nEnvironment: $envName"
+            text = "SUCCESS `nBranch: ${{ github.ref_name }}`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}"
           } | ConvertTo-Json
 
           Invoke-RestMethod `
@@ -77,10 +82,8 @@ jobs:
         if: failure()
         shell: powershell
         run: |
-          $envName = "${{ steps.env.outputs.ENV_NAME }}"
-
           $payload = @{
-            text = "FAILED Branch: ${{ github.ref_name }}`nEnvironment: $envName"
+            text = "FAILED `nBranch: ${{ github.ref_name }}`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}"
           } | ConvertTo-Json
 
           Invoke-RestMethod `

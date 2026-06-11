@@ -31,7 +31,9 @@ jobs:
             echo "ENV_NAME=Buhle" >> $env:GITHUB_OUTPUT
           }
 
+      #  ONLY RUNS ON STAGING NOW
       - name: Send Approval Request Notification (Teams)
+        if: github.ref_name == 'staging'
         shell: powershell
         run: |
           $envName = "${{ steps.env.outputs.ENV_NAME }}"

@@ -64,7 +64,7 @@ jobs:
         shell: powershell
         run: |
           $payload = @{
-            text = "LOCAL DATABASE DEPLOYMENT - SUCCESS`n`nCreator: Shriya`n`nBranch: ${{ github.ref_name }}`n`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`n`nDate: $(Get-Date -Format 'yyyy-MM-dd')`n`nDeployment completed successfully."
+            text = "DATABASE DEPLOYMENT - SUCCESS`n`nCreator: Shriya`n`nBranch: ${{ github.ref_name }}`n`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`n`nDate: $(Get-Date -Format 'yyyy-MM-dd')`n`nDeployment completed successfully."
           } | ConvertTo-Json
 
           Invoke-RestMethod -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `

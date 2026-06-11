@@ -37,7 +37,7 @@ jobs:
           $envName = "${{ steps.env.outputs.ENV_NAME }}"
 
           $payload = @{
-            text = "APPROVAL REQUIRED `nBranch: ${{ github.ref_name }}`nEnvironment: $envName`nPlease approve in GitHub Environments"
+            text = " DATABASE DEPLOYMENT APPROVAL REQUIRED`n`n Requested by: Shriya`n Branch: ${{ github.ref_name }}`n Environment: $envName`n Time: $(Get-Date)`n`n Action Required: Please approve this deployment in GitHub Environments."
           } | ConvertTo-Json
 
           Invoke-RestMethod `
@@ -64,7 +64,7 @@ jobs:
           $envName = "${{ steps.env.outputs.ENV_NAME }}"
 
           $payload = @{
-            text = "SUCCESS Branch: ${{ github.ref_name }}`nEnvironment: $envName"
+            text = " DEPLOYMENT SUCCESSFUL`n`n Deployed by: Shriya`n Branch: ${{ github.ref_name }}`n Environment: $envName`n Time: $(Get-Date)`n`n Database deployed successfully with no errors."
           } | ConvertTo-Json
 
           Invoke-RestMethod `
@@ -80,7 +80,7 @@ jobs:
           $envName = "${{ steps.env.outputs.ENV_NAME }}"
 
           $payload = @{
-            text = "FAILED Branch: ${{ github.ref_name }}`nEnvironment: $envName"
+            text = " DEPLOYMENT FAILED`n`n Triggered by: Shriya`n Branch: ${{ github.ref_name }}`n Environment: $envName`n Time: $(Get-Date)`n`n Please check GitHub Actions logs for error details."
           } | ConvertTo-Json
 
           Invoke-RestMethod `

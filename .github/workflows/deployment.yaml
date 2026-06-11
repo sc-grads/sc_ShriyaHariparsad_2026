@@ -39,7 +39,7 @@ jobs:
           $envName = "${{ steps.env.outputs.ENV_NAME }}"
 
           $payload = @{
-            text = " DATABASE DEPLOYMENT APPROVAL REQUIRED`n`n Requested by: Shriya`n Branch: ${{ github.ref_name }}`n Environment: $envName`n Time: $(Get-Date)`n`n Action Required: Please approve this deployment in GitHub Environments."
+            text = " DATABASE DEPLOYMENT APPROVAL REQUIRED`n`n Requested by: Shriya`n Branch: ${{ github.ref_name }}`n Environment: $envName`n Time: $(Get-Date)`n`n Action Required: Please approve this deployment."
           } | ConvertTo-Json
 
           Invoke-RestMethod `

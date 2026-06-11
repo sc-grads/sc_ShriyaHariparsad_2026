@@ -40,7 +40,7 @@ jobs:
         shell: powershell
         run: |
           $payload = @{
-            text = "DATABASE DEPLOYMENT - APPROVAL REQUIRED`n`nCreator: Shriya`n`nBranch: ${{ github.ref_name }}`n`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`n`nDate/Time: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`n`nApproval required before deployment."
+            text = "PARTNER DATABASE DEPLOYMENT - APPROVAL REQUIRED`n`nCreator: Shriya`n`nBranch: ${{ github.ref_name }}`n`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`n`nDate/Time: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`n`nApproval required before deployment."
           } | ConvertTo-Json
 
           Invoke-RestMethod -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
@@ -64,7 +64,7 @@ jobs:
         shell: powershell
         run: |
           $payload = @{
-            text = "LOCAL DATABASE DEPLOYMENT - SUCCESS`n`nCreator: Shriya`n`nBranch: ${{ github.ref_name }}`n`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`n`nDate/Time: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`n`nDeployment completed successfully."
+            text = "LOCAL DATABASE DEPLOYMENT - SUCCESS`n`nCreator: Shriya`n`nBranch: ${{ github.ref_name }}`n`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`n`nDate: $(Get-Date -Format 'yyyy-MM-dd')`n`nDeployment completed successfully."
           } | ConvertTo-Json
 
           Invoke-RestMethod -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
@@ -77,10 +77,11 @@ jobs:
         shell: powershell
         run: |
           $payload = @{
-            text = "LOCAL DATABASE DEPLOYMENT - FAILED`n`nCreator: Shriya`n`nBranch: ${{ github.ref_name }}`n`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`n`nDate/Time: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`n`nDeployment failed."
+            text = "DATABASE DEPLOYMENT - FAILED`n`nCreator: Shriya`n`nBranch: ${{ github.ref_name }}`n`nEnvironment: ${{ steps.env.outputs.ENV_NAME }}`n`nDate: $(Get-Date -Format 'yyyy-MM-dd')`n`nDeployment failed."
           } | ConvertTo-Json
 
           Invoke-RestMethod -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
             -Method Post `
             -Body $payload `
             -ContentType "application/json"
+D

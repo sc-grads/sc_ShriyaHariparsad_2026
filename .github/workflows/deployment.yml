@@ -2,14 +2,42 @@ name: Database Deployment
 
 on:
   push:
-    branches:
-      - main
-      - staging
-
+    branches: main
+    
   workflow_dispatch:
 
 jobs:
 
-  deploy:
+  deploy-Shriya:
     uses: ./.github/workflows/deployment_template.yml
+    with:
+      environment_name: production
+    secrets: inherit
+
+  notify-Buhle-approval:
+    needs: deploy-Shriya
+    runs-on: windows-latest
+
+    steps:
+      - name: Send Approval Request Notification
+        shell: powershell
+        run: |
+          $timestamp = Get-Date -Format "yyyy-MM-dd"
+
+          $text = "DATABASE DEPLOYMENT - APPROVAL REQUIRED`n`nCreator: ${{ github.actor }}`n`nEnvironment: Buhle`n`nDate: $timestamp`n`nPlease approve this deployment in GitHub Environments."
+
+          $payload = @{ text = $text } | ConvertTo-Json -Depth 1
+
+          Invoke-RestMethod `
+            -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+            -Method Post `
+            -Body $payload `
+            -ContentType "application/json"
+
+  deploy-Buhle:
+    needs: notify-Buhle-approval
+
+    uses: ./.github/workflows/deployment_template.yml
+    with:
+      environment_name: Buhle
     secrets: inherit

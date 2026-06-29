@@ -9,23 +9,42 @@ jobs:
     runs-on: self-hosted
 
     env:
-      # --- UPDATED TO MATCH YOUR EXACT GITHUB NESTED FOLDERS ---
-      SSIS_PROJECT_PATH: "Timesheet_Project/TimesheetMigration/TimesheetMigration/TimesheetMigration.dtproj" 
+      # --- PATHS & DATABASE VALUES ---
+      SSIS_SOLUTION_PATH: "Timesheet_Project/TimesheetMigration/TimesheetMigration.sln" 
       OUTPUT_FOLDER: "Timesheet_Project/TimesheetMigration/TimesheetMigration/bin/Development"
       SSIS_SERVER: "localhost"                                
       SSIS_CATALOG_FOLDER: "TimesheetMigration"                
       SSIS_PROJECT_NAME: "TimesheetMigration"
+      TARGET_DATABASE: "TimesheetDB"
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Build SSIS Project
+      - name: Locate Visual Studio and Build SSIS Solution
+        shell: powershell
         run: |
-          msbuild "${{ env.SSIS_PROJECT_PATH }}" /p:Configuration=Development /p:Platform="Anymcu"
+          # Find the Visual Studio installation directory dynamically
+          $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property productPath
+          if (-not $vsPath) {
+              Write-Error "Visual Studio (devenv.com) could not be located on this machine!"
+              exit 1
+          }
+          
+          # Convert productPath (devenv.exe) to command line tool (devenv.com)
+          $devenv = $vsPath.Replace("devenv.exe", "devenv.com")
+          Write-Host "Using Visual Studio Compiler: $devenv"
+          
+          # Compile the SSIS Solution using Visual Studio DevEnv
+          $solutionFile = Resolve-Path "${{ env.SSIS_SOLUTION_PATH }}"
+          Write-Host "Building solution: $solutionFile"
+          
+          & $devenv "$solutionFile" /Build "Development"
+          
+          if ($LASTEXITCODE -ne 0) {
+              Write-Error "Visual Studio build failed with exit code $LASTEXITCODE"
+              exit 1
+          }
 
       - name: Deploy SSIS Package to SSISDB
         shell: powershell
@@ -33,8 +52,8 @@ jobs:
           # Load the Integration Services Assembly
           [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Management.IntegrationServices") | Out-Null
           
-          # Connect using Windows Integrated Security
-          $connectionString = "Data Source=${{ env.SSIS_SERVER }};Initial Catalog=master;Integrated Security=True;"
+          # Connect using Windows Integrated Security targeting your server instance
+          $connectionString = "Data Source=${{ env.SSIS_SERVER }};Initial Catalog=${{ env.TARGET_DATABASE }};Integrated Security=True;"
           $sqlConnection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
           $integrationServices = New-Object Microsoft.SqlServer.Management.IntegrationServices.IntegrationServices($sqlConnection)
           $catalog = $integrationServices.Catalogs["SSISDB"]
@@ -53,4 +72,4 @@ jobs:
           
           Write-Host "Deploying $ispacPath to local catalog folder..."
           $folder.DeployProject($env:SSIS_PROJECT_NAME, $projectBytes)
-          Write-Host "SSIS project deployed successfully to database."
+          Write-Host "SSIS project deployed successfully to database: ${{ env.TARGET_DATABASE }}."

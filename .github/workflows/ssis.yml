@@ -9,9 +9,6 @@ jobs:
     runs-on: self-hosted
 
     env:
-      # --- PATHS & DATABASE VALUES ---
-      SSIS_SOLUTION_PATH: "Timesheet_Project/TimesheetMigration/TimesheetMigration.sln" 
-      OUTPUT_FOLDER: "Timesheet_Project/TimesheetMigration/TimesheetMigration/bin/Development"
       SSIS_SERVER: "localhost"                                
       SSIS_CATALOG_FOLDER: "TimesheetMigration"                
       SSIS_PROJECT_NAME: "TimesheetMigration"
@@ -24,22 +21,38 @@ jobs:
       - name: Locate Visual Studio and Build SSIS Solution
         shell: powershell
         run: |
-          # Find the Visual Studio installation directory dynamically
+          # 1. Find Visual Studio compiler dynamically
           $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property productPath
           if (-not $vsPath) {
               Write-Error "Visual Studio (devenv.com) could not be located on this machine!"
               exit 1
           }
-          
-          # Convert productPath (devenv.exe) to command line tool (devenv.com)
           $devenv = $vsPath.Replace("devenv.exe", "devenv.com")
           Write-Host "Using Visual Studio Compiler: $devenv"
           
-          # Compile the SSIS Solution using Visual Studio DevEnv
-          $solutionFile = Resolve-Path "${{ env.SSIS_SOLUTION_PATH }}"
-          Write-Host "Building solution: $solutionFile"
+          # 2. Find the Solution (.sln) file dynamically in your repository
+          $slnFile = Get-ChildItem -Path . -Filter "TimesheetMigration.sln" -Recurse | Select-Object -First 1
+          if ($null -eq $slnFile) {
+              Write-Error "Could not find TimesheetMigration.sln anywhere in the workspace!"
+              exit 1
+          }
+          $solutionPath = $slnFile.FullName
+          Write-Host "Found Solution file at: $solutionPath"
           
-          & $devenv "$solutionFile" /Build "Development"
+          # 3. Find the compiled output folder dynamically where the .ispac will go
+          $dtprojFile = Get-ChildItem -Path . -Filter "TimesheetMigration.dtproj" -Recurse | Select-Object -First 1
+          if ($null -eq $dtprojFile) {
+              Write-Error "Could not find TimesheetMigration.dtproj anywhere in the workspace!"
+              exit 1
+          }
+          $ispacFolder = Join-Path $dtprojFile.DirectoryName "bin\Development"
+          $ispacPath = Join-Path $ispacFolder "TimesheetMigration.ispac"
+          
+          # Pass this path to the next step dynamically
+          echo "RESOLVED_ISPAC_PATH=$ispacPath" >> $env:GITHUB_ENV
+          
+          # 4. Compile the SSIS Solution
+          & $devenv "$solutionPath" /Build "Development"
           
           if ($LASTEXITCODE -ne 0) {
               Write-Error "Visual Studio build failed with exit code $LASTEXITCODE"
@@ -66,10 +79,17 @@ jobs:
               $folder = $catalog.Folders[$env:SSIS_CATALOG_FOLDER]
           }
           
-          # Read and deploy compiled .ispac file
-          $ispacPath = Join-Path "${{ env.OUTPUT_FOLDER }}" "${{ env.SSIS_PROJECT_NAME }}.ispac"
+          # Read and deploy compiled .ispac file from the dynamically found path
+          $ispacPath = $env:RESOLVED_ISPAC_PATH
+          Write-Host "Reading compiled file from: $ispacPath"
+          
+          if (-not (Test-Path $ispacPath)) {
+              Write-Error "Compiled .ispac file was not found at $ispacPath! Check Visual Studio build output."
+              exit 1
+          }
+          
           [byte[]]$projectBytes = [System.IO.File]::ReadAllBytes($ispacPath)
           
-          Write-Host "Deploying $ispacPath to local catalog folder..."
+          Write-Host "Deploying project to local catalog folder..."
           $folder.DeployProject($env:SSIS_PROJECT_NAME, $projectBytes)
           Write-Host "SSIS project deployed successfully to database: ${{ env.TARGET_DATABASE }}."

@@ -9,7 +9,7 @@ jobs:
     runs-on: self-hosted
 
     env:
-      SSIS_SERVER: "localhost"                                
+      SSIS_SERVER: "SAMBE2025001"                                
       SSIS_CATALOG_FOLDER: "TimesheetMigration"                
       SSIS_PROJECT_NAME: "TimesheetMigration"
       TARGET_DATABASE: "TimesheetDB"

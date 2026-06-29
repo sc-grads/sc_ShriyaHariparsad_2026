@@ -9,8 +9,9 @@ jobs:
     runs-on: self-hosted
 
     env:
-      SSIS_PROJECT_PATH: "Timesheet_Project/TimesheetMigration.dtproj" 
-      OUTPUT_FOLDER: "Timesheet_Project/bin/Development"
+      # --- UPDATED TO MATCH YOUR EXACT GITHUB NESTED FOLDERS ---
+      SSIS_PROJECT_PATH: "Timesheet_Project/TimesheetMigration/TimesheetMigration/TimesheetMigration.dtproj" 
+      OUTPUT_FOLDER: "Timesheet_Project/TimesheetMigration/TimesheetMigration/bin/Development"
       SSIS_SERVER: "localhost"                                
       SSIS_CATALOG_FOLDER: "TimesheetMigration"                
       SSIS_PROJECT_NAME: "TimesheetMigration"
@@ -32,13 +33,13 @@ jobs:
           # Load the Integration Services Assembly
           [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Management.IntegrationServices") | Out-Null
           
-          # Connect to local server using Integrated Windows Security
+          # Connect using Windows Integrated Security
           $connectionString = "Data Source=${{ env.SSIS_SERVER }};Initial Catalog=master;Integrated Security=True;"
           $sqlConnection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
           $integrationServices = New-Object Microsoft.SqlServer.Management.IntegrationServices.IntegrationServices($sqlConnection)
           $catalog = $integrationServices.Catalogs["SSISDB"]
           
-          # Automatically create the folder structure inside SSISDB if missing
+          # Automatically build catalog folder if missing
           if (-not $catalog.Folders[$env:SSIS_CATALOG_FOLDER]) {
               $folder = New-Object Microsoft.SqlServer.Management.IntegrationServices.CatalogFolder($catalog, $env:SSIS_CATALOG_FOLDER, "Timesheet Data Migration Folder")
               $folder.Create()
@@ -46,10 +47,10 @@ jobs:
               $folder = $catalog.Folders[$env:SSIS_CATALOG_FOLDER]
           }
           
-          # Read and deploy the binary deployment file (.ispac)
+          # Read and deploy compiled .ispac file
           $ispacPath = Join-Path "${{ env.OUTPUT_FOLDER }}" "${{ env.SSIS_PROJECT_NAME }}.ispac"
           [byte[]]$projectBytes = [System.IO.File]::ReadAllBytes($ispacPath)
           
-          Write-Host "Deploying $ispacPath to local catalog folder: $env:SSIS_CATALOG_FOLDER"
+          Write-Host "Deploying $ispacPath to local catalog folder..."
           $folder.DeployProject($env:SSIS_PROJECT_NAME, $projectBytes)
           Write-Host "SSIS project deployed successfully to database."

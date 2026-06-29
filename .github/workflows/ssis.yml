@@ -56,24 +56,26 @@ jobs:
         path: C:\sc_ShriyaHariparsad_2026\Timesheet_Project\TimesheetMigration\TimesheetMigration\bin\Development\TimesheetMigration.ispac
  
     # ==========================================
-    # PHASE 2: CONTINUOUS DEPLOYMENT (LOCAL LOOPBACK PORT INJECTION)
+    # PHASE 2: CONTINUOUS DEPLOYMENT (IMPERSONATION)
     # ==========================================
     - name: Deploy to SSISDB Catalog
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
-        # CHANGED: Replaced Integrated Security with explicit SQL Login credentials to bypass domain block
-        $connectionString = "Server=127.0.0.1,1433;Database=master;User Id=sa;Password=${{ secrets.SQL_PASSWORD }};TrustServerCertificate=True;"
+        # Create a secure credential block using your real Windows login info
+        $passwordSecure = ConvertTo-SecureString "${{ secrets.WINDOWS_PASSWORD }}" -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential("${{ secrets.WINDOWS_USERNAME }}", $passwordSecure)
+
+        # Build the script that runs inside your user account context
+        $scriptBlockText = @'
+        $connectionString = "Server=127.0.0.1,1433;Database=master;Integrated Security=True;TrustServerCertificate=True;"
         $folderName = "TimesheetDeployments"
        
         $projectPath = "C:\sc_ShriyaHariparsad_2026\Timesheet_Project\TimesheetMigration\TimesheetMigration\bin\Development\TimesheetMigration.ispac"
         $projectName = [System.IO.Path]::GetFileNameWithoutExtension($projectPath)
        
-        Write-Host "Reading $projectName binary package data from: $projectPath"
         $fileBytes = [System.IO.File]::ReadAllBytes($projectPath)
         $hexString = "0x" + [System.BitConverter]::ToString($fileBytes).Replace("-", "")
- 
-        Write-Host "Deploying directly via internal database port mapping..."
        
         $deployQuery = "
         SET NOCOUNT ON;
@@ -100,3 +102,7 @@ jobs:
         } finally {
             $connection.Close()
         }
+        '@
+
+        # Run the deployment query explicitly pretending to be your trusted Windows User profile
+        Invoke-Command -ComputerName localhost -Credential $credential -ScriptBlock ([scriptblock]::Create($scriptBlockText))

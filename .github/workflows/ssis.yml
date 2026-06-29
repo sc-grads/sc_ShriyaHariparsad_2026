@@ -56,26 +56,24 @@ jobs:
         path: C:\sc_ShriyaHariparsad_2026\Timesheet_Project\TimesheetMigration\TimesheetMigration\bin\Development\TimesheetMigration.ispac
  
     # ==========================================
-    # PHASE 2: CONTINUOUS DEPLOYMENT (LOCAL USER NATIVE IMPERSONATION)
+    # PHASE 2: CONTINUOUS DEPLOYMENT (ZERO-PASSWORD INJECTION)
     # ==========================================
     - name: Deploy to SSISDB Catalog
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
-        # 1. Create a standalone PowerShell script file dynamically to execute locally on the disk
-        $localScriptPath = "C:\sc_ShriyaHariparsad_2026\deploy_execution_temp.ps1"
-        
-        $scriptContent = @'
-        $connectionString = "Server=127.0.0.1,1433;Database=master;Integrated Security=True;TrustServerCertificate=True;"
-        $folderName = "TimesheetDeployments"
-       
         $projectPath = "C:\sc_ShriyaHariparsad_2026\Timesheet_Project\TimesheetMigration\TimesheetMigration\bin\Development\TimesheetMigration.ispac"
+        $folderName = "TimesheetDeployments"
         $projectName = [System.IO.Path]::GetFileNameWithoutExtension($projectPath)
-       
+        
+        Write-Host "Reading $projectName binary package data..."
         $fileBytes = [System.IO.File]::ReadAllBytes($projectPath)
         $hexString = "0x" + [System.BitConverter]::ToString($fileBytes).Replace("-", "")
-       
-        $deployQuery = "
+        
+        # 1. Create a clean SQL script file on disk containing the binary payload
+        $sqlScriptPath = "C:\sc_ShriyaHariparsad_2026\deploy_execution_temp.sql"
+        
+        $sqlQuery = @"
         SET NOCOUNT ON;
         IF NOT EXISTS (SELECT 1 FROM [SSISDB].[catalog].[folders] WHERE name = '$folderName')
         BEGIN
@@ -86,43 +84,20 @@ jobs:
             @folder_name = '$folderName',
             @project_name = '$projectName',
             @project_stream = @project_binary;
-        "
- 
-        $connection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
-        $command = New-Object System.Data.SqlClient.SqlCommand($deployQuery, $connection)
-       
-        try {
-            $connection.Open()
-            $command.ExecuteNonQuery() | Out-Null
-            Write-Host "SUCCESS: Deployment completed! Your SSIS project is now live in SSMS."
-        } catch {
-            Write-Error "Database connection crashed: $_"
-            exit 1
-        } finally {
-            $connection.Close()
+        "@
+        
+        $sqlQuery | Out-File -FilePath $sqlScriptPath -Encoding ascii -Force
+        
+        # 2. Execute via native sqlcmd utilizing local machine loopback trusted security connection
+        Write-Host "Executing deployment query directly via trusted local loopback..."
+        
+        sqlcmd -S "SAMBE2025001" -d "master" -E -b -i "$sqlScriptPath"
+        
+        if ($LASTEXITCODE -ne 0) {
+            Throw "SQL deployment script failed during execution. Check SSMS catalog status."
         }
-        '@
         
-        $scriptContent | Out-File -FilePath $localScriptPath -Encoding utf8 -Force
+        Write-Host "SUCCESS: Deployment completed! Your SSIS project is now live in SSMS."
         
-        # 2. Use a secure pipeline trick to pass the password to the native Windows 'runas' command line
-        Write-Host "Impersonating your local Windows User identity locally..."
-        $username = "${{ secrets.WINDOWS_USERNAME }}"
-        $password = "${{ secrets.WINDOWS_PASSWORD }}"
-        
-        # Build an automated wrapper tool to inject the password into the prompt stream natively
-        $comObject = New-Object -ComObject WScript.Shell
-        
-        # Start a local background process running as YOU to execute your database script
-        Start-Process runas.exe -ArgumentList "/user:$username `"powershell.exe -ExecutionPolicy Bypass -File $localScriptPath`"" -NoNewWindow
-        Start-Sleep -Seconds 2
-        
-        # Inject your password directly into the local secure terminal context
-        $comObject.SendKeys($password)
-        $comObject.SendKeys("{ENTER}")
-        
-        Start-Sleep -Seconds 5
-        Write-Host "Impersonation query pass-through finalized."
-        
-        # Clean up temporary execution script
-        if (Test-Path $localScriptPath) { Remove-Item $localScriptPath -Force }
+        # 3. Clean up the temporary script file
+        if (Test-Path $sqlScriptPath) { Remove-Item $sqlScriptPath -Force }

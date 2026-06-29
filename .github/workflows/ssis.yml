@@ -9,17 +9,14 @@ jobs:
     runs-on: self-hosted
 
     env:
+      # --- EMBEDDED FROM YOUR EXACT EXCEL PATH STRINGS ---
+      LOCAL_WORKING_DIRECTORY: "C:\\sc_ShriyaHariparsad_2026"
       SSIS_SERVER: "SAMBE2025001"                                
       SSIS_CATALOG_FOLDER: "TimesheetMigration"                
       SSIS_PROJECT_NAME: "TimesheetMigration"
       TARGET_DATABASE: "TimesheetDB"
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          clean: true # Forces the runner to wipe out stale cache and sync folders completely
-
       - name: Locate Visual Studio and Build SSIS Solution
         shell: powershell
         run: |
@@ -32,22 +29,20 @@ jobs:
           $devenv = $vsPath.Replace("devenv.exe", "devenv.com")
           Write-Host "Using Visual Studio Compiler: $devenv"
           
-          # 2. Find the Solution (.sln) file dynamically in your repository
+          # 2. Navigate directly to your local workspace directory
+          cd "${{ env.LOCAL_WORKING_DIRECTORY }}"
+          Write-Host "Switched to local workspace: $(Get-Location)"
+          
+          # 3. Find the Solution (.sln) file dynamically in your repository
           $slnFile = Get-ChildItem -Path . -Filter "TimesheetMigration.sln" -Recurse | Select-Object -First 1
           if ($null -eq $slnFile) {
-              Write-Host "WARNING: Global recursive scan missed it. Checking hardcoded folder layout..."
-              $slnFile = Get-ChildItem -Path "Timesheet_Project" -Filter "TimesheetMigration.sln" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-          }
-          
-          if ($null -eq $slnFile) {
-              Write-Error "Could not find TimesheetMigration.sln anywhere in the workspace! Printing workspace items:"
-              Get-ChildItem -Name
+              Write-Error "Could not find TimesheetMigration.sln inside ${{ env.LOCAL_WORKING_DIRECTORY }}!"
               exit 1
           }
           $solutionPath = $slnFile.FullName
           Write-Host "Found Solution file at: $solutionPath"
           
-          # 3. Find the compiled output folder dynamically where the .ispac will go
+          # 4. Find the compiled output folder dynamically where the .ispac will go
           $dtprojFile = Get-ChildItem -Path . -Filter "TimesheetMigration.dtproj" -Recurse | Select-Object -First 1
           if ($null -eq $dtprojFile) {
               Write-Error "Could not find TimesheetMigration.dtproj anywhere in the workspace!"
@@ -59,7 +54,7 @@ jobs:
           # Pass this path to the next step dynamically
           echo "RESOLVED_ISPAC_PATH=$ispacPath" >> $env:GITHUB_ENV
           
-          # 4. Compile the SSIS Solution
+          # 5. Compile the SSIS Solution
           & $devenv "$solutionPath" /Build "Development"
           
           if ($LASTEXITCODE -ne 0) {

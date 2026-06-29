@@ -1,0 +1,87 @@
+name: Automated SSIS Data Migration Deployment
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    env:
+      SSIS_PROJECT_PATH: "Timesheet_Project/TimesheetMigration.dtproj" 
+      OUTPUT_FOLDER: "Timesheet_Project/bin/Development"
+      SSIS_SERVER: "localhost"                                
+      SSIS_CATALOG_FOLDER: "TimesheetMigration"                
+      SSIS_PROJECT_NAME: "TimesheetMigration"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Notify Deployment Started
+        shell: powershell
+        run: |
+          $timestamp = Get-Date -Format "yyyy-MM-dd"
+          $text = "SSIS DEPLOYMENT - STARTED`n`nCreator: ${{ github.actor }}`n`nEnvironment: Local`n`nDate: $timestamp`n`nSSIS deployment pipeline has started."
+          $payload = @{ text = $text } | ConvertTo-Json -Depth 1
+          Invoke-RestMethod `
+            -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+            -Method Post `
+            -Body $payload `
+            -ContentType "application/json"
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build SSIS Project
+        run: |
+          msbuild "${{ env.SSIS_PROJECT_PATH }}" /p:Configuration=Development /p:Platform="Anymcu"
+
+      - name: Deploy SSIS Package to SSISDB
+        shell: powershell
+        run: |
+          [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Management.IntegrationServices") | Out-Null
+          
+          $connectionString = "Data Source=${{ env.SSIS_SERVER }};Initial Catalog=master;Integrated Security=True;"
+          $sqlConnection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
+          $integrationServices = New-Object Microsoft.SqlServer.Management.IntegrationServices.IntegrationServices($sqlConnection)
+          $catalog = $integrationServices.Catalogs["SSISDB"]
+          
+          if (-not $catalog.Folders[$env:SSIS_CATALOG_FOLDER]) {
+              $folder = New-Object Microsoft.SqlServer.Management.IntegrationServices.CatalogFolder($catalog, $env:SSIS_CATALOG_FOLDER, "Timesheet Data Migration Folder")
+              $folder.Create()
+          } else {
+              $folder = $catalog.Folders[$env:SSIS_CATALOG_FOLDER]
+          }
+          
+          $ispacPath = Join-Path "${{ env.OUTPUT_FOLDER }}" "${{ env.SSIS_PROJECT_NAME }}.ispac"
+          [byte[]]$projectBytes = [System.IO.File]::ReadAllBytes($ispacPath)
+          
+          $folder.DeployProject($env:SSIS_PROJECT_NAME, $projectBytes)
+
+      - name: Notify Success
+        if: success()
+        shell: powershell
+        run: |
+          $timestamp = Get-Date -Format "yyyy-MM-dd"
+          $text = "SSIS DEPLOYMENT - SUCCESS`n`nCreator: ${{ github.actor }}`n`nEnvironment: Local`n`nDate: $timestamp`n`nSSIS package successfully built and deployed to local SSISDB."
+          $payload = @{ text = $text } | ConvertTo-Json -Depth 1
+          Invoke-RestMethod `
+            -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+            -Method Post `
+            -Body $payload `
+            -ContentType "application/json"
+
+      - name: Notify Failure
+        if: failure()
+        shell: powershell
+        run: |
+          $timestamp = Get-Date -Format "yyyy-MM-dd"
+          $text = "SSIS DEPLOYMENT - FAILED`n`nCreator: ${{ github.actor }}`n`nEnvironment: Local`n`nDate: $timestamp`n`nDeployment failed. Please check the runner logs for compilation or SSISDB permissions errors."
+          $payload = @{ text = $text } | ConvertTo-Json -Depth 1
+          Invoke-RestMethod `
+            -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+            -Method Post `
+            -Body $payload `
+            -ContentType "application/json"

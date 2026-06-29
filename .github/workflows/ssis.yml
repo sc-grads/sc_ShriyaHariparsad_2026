@@ -9,16 +9,15 @@ jobs:
     runs-on: self-hosted
 
     env:
-      # --- ADJUSTED TO TARGET REPOSITORY STRUCTURAL ROOTS ---
-      SSIS_SOLUTION_PATH: "C:\\sc_ShriyaHariparsad_2026\\Timesheet_Project\\TimesheetMigration\\TimesheetMigration.sln"
-      SSIS_PROJECT_DIR: "C:\\sc_ShriyaHariparsad_2026\\Timesheet_Project\\TimesheetMigration\\TimesheetMigration"
-      
       SSIS_SERVER: "SAMBE2025001"                                
       SSIS_CATALOG_FOLDER: "TimesheetMigration"                
       SSIS_PROJECT_NAME: "TimesheetMigration"
       TARGET_DATABASE: "TimesheetDB"
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Locate Visual Studio and Build SSIS Solution
         shell: powershell
         run: |
@@ -31,35 +30,33 @@ jobs:
           $devenv = $vsPath.Replace("devenv.exe", "devenv.com")
           Write-Host "Using Visual Studio Compiler: $devenv"
           
-          # 2. Dynamic Fallback Verification for Solution Path
-          $slnPath = "${{ env.SSIS_SOLUTION_PATH }}"
-          if (-not (Test-Path $slnPath)) {
-              Write-Host "Primary path failed. Trying fallback structural path placement..."
-              $slnPath = "C:\sc_ShriyaHariparsad_2026\Timesheet_Project\TimesheetMigration.sln"
-          }
-          if (-not (Test-Path $slnPath)) {
-              Write-Host "Secondary path failed. Trying nested project path placement..."
-              $slnPath = "C:\sc_ShriyaHariparsad_2026\Timesheet_Project\TimesheetMigration\TimesheetMigration\TimesheetMigration.sln"
-          }
+          # 2. Find the Solution (.sln) file inside the checked out workspace directory
+          Write-Host "Searching inside workspace: $env:GITHUB_WORKSPACE"
+          cd $env:GITHUB_WORKSPACE
           
-          if (-not (Test-Path $slnPath)) {
-              Write-Error "Could not verify absolute location of your .sln file on C:\ drive. Please verify placement."
+          $slnFile = Get-ChildItem -Path . -Filter "TimesheetMigration.sln" -Recurse | Select-Object -First 1
+          if ($null -eq $slnFile) {
+              Write-Error "Could not find TimesheetMigration.sln anywhere inside the repository workspace!"
               exit 1
           }
-          Write-Host "Verified solution path exists at: $slnPath"
+          $solutionPath = $slnFile.FullName
+          Write-Host "Found Solution file at: $solutionPath"
           
-          # 3. Dynamic Fallback Verification for Project Path
-          $projDir = "${{ env.SSIS_PROJECT_DIR }}"
-          if (-not (Test-Path $projDir)) {
-              $projDir = "C:\sc_ShriyaHariparsad_2026\Timesheet_Project\TimesheetMigration"
+          # 3. Find the project folder and map the .ispac deployment target
+          $dtprojFile = Get-ChildItem -Path . -Filter "TimesheetMigration.dtproj" -Recurse | Select-Object -First 1
+          if ($null -eq $dtprojFile) {
+              Write-Error "Could not find TimesheetMigration.dtproj anywhere inside the repository workspace!"
+              exit 1
           }
+          $ispacFolder = Join-Path $dtprojFile.DirectoryName "bin\Development"
+          $ispacPath = Join-Path $ispacFolder "TimesheetMigration.ispac"
           
-          $ispacPath = Join-Path $projDir "bin\Development\TimesheetMigration.ispac"
+          # Pass the discovered path to the next step dynamically
           echo "RESOLVED_ISPAC_PATH=$ispacPath" >> $env:GITHUB_ENV
           
           # 4. Compile the SSIS Solution
           Write-Host "Compiling solution..."
-          & $devenv "$slnPath" /Build "Development"
+          & $devenv "$solutionPath" /Build "Development"
           
           if ($LASTEXITCODE -ne 0) {
               Write-Error "Visual Studio build failed with exit code $LASTEXITCODE"
@@ -69,13 +66,16 @@ jobs:
       - name: Deploy SSIS Package to SSISDB
         shell: powershell
         run: |
+          # Load the Integration Services Assembly
           [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Management.IntegrationServices") | Out-Null
           
+          # Connect using Windows Integrated Security targeting your server instance
           $connectionString = "Data Source=${{ env.SSIS_SERVER }};Initial Catalog=${{ env.TARGET_DATABASE }};Integrated Security=True;"
           $sqlConnection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
           $integrationServices = New-Object Microsoft.SqlServer.Management.IntegrationServices.IntegrationServices($sqlConnection)
           $catalog = $integrationServices.Catalogs["SSISDB"]
           
+          # Automatically build catalog folder if missing
           if (-not $catalog.Folders[$env:SSIS_CATALOG_FOLDER]) {
               $folder = New-Object Microsoft.SqlServer.Management.IntegrationServices.CatalogFolder($catalog, $env:SSIS_CATALOG_FOLDER, "Timesheet Data Migration Folder")
               $folder.Create()
@@ -83,17 +83,12 @@ jobs:
               $folder = $catalog.Folders[$env:SSIS_CATALOG_FOLDER]
           }
           
+          # Read and deploy compiled .ispac file from the dynamically found path
           $ispacPath = $env:RESOLVED_ISPAC_PATH
           Write-Host "Reading compiled file from: $ispacPath"
           
           if (-not (Test-Path $ispacPath)) {
-              # Fallback look for compiled file if project folder structure varies
-              $fallbackFile = Get-ChildItem -Path "C:\sc_ShriyaHariparsad_2026" -Filter "TimesheetMigration.ispac" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-              if ($fallbackFile) { $ispacPath = $fallbackFile.FullName }
-          }
-          
-          if (-not (Test-Path $ispacPath)) {
-              Write-Error "Compiled .ispac file was not found at $ispacPath!"
+              Write-Error "Compiled .ispac file was not found at $ispacPath! Check Visual Studio build output."
               exit 1
           }
           

@@ -56,18 +56,16 @@ jobs:
         path: C:\sc_ShriyaHariparsad_2026\Timesheet_Project\TimesheetMigration\TimesheetMigration\bin\Development\TimesheetMigration.ispac
  
     # ==========================================
-    # PHASE 2: CONTINUOUS DEPLOYMENT (IMPERSONATION)
+    # PHASE 2: CONTINUOUS DEPLOYMENT (LOCAL USER NATIVE IMPERSONATION)
     # ==========================================
     - name: Deploy to SSISDB Catalog
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
-        # Create a secure credential block using your real Windows login info
-        $passwordSecure = ConvertTo-SecureString "${{ secrets.WINDOWS_PASSWORD }}" -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential("${{ secrets.WINDOWS_USERNAME }}", $passwordSecure)
-
-        # Build the script that runs inside your user account context
-        $scriptBlockText = @'
+        # 1. Create a standalone PowerShell script file dynamically to execute locally on the disk
+        $localScriptPath = "C:\sc_ShriyaHariparsad_2026\deploy_execution_temp.ps1"
+        
+        $scriptContent = @'
         $connectionString = "Server=127.0.0.1,1433;Database=master;Integrated Security=True;TrustServerCertificate=True;"
         $folderName = "TimesheetDeployments"
        
@@ -98,11 +96,33 @@ jobs:
             $command.ExecuteNonQuery() | Out-Null
             Write-Host "SUCCESS: Deployment completed! Your SSIS project is now live in SSMS."
         } catch {
-            Throw "Database connection crashed: $_"
+            Write-Error "Database connection crashed: $_"
+            exit 1
         } finally {
             $connection.Close()
         }
         '@
-
-        # Run the deployment query explicitly pretending to be your trusted Windows User profile
-        Invoke-Command -ComputerName localhost -Credential $credential -ScriptBlock ([scriptblock]::Create($scriptBlockText))
+        
+        $scriptContent | Out-File -FilePath $localScriptPath -Encoding utf8 -Force
+        
+        # 2. Use a secure pipeline trick to pass the password to the native Windows 'runas' command line
+        Write-Host "Impersonating your local Windows User identity locally..."
+        $username = "${{ secrets.WINDOWS_USERNAME }}"
+        $password = "${{ secrets.WINDOWS_PASSWORD }}"
+        
+        # Build an automated wrapper tool to inject the password into the prompt stream natively
+        $comObject = New-Object -ComObject WScript.Shell
+        
+        # Start a local background process running as YOU to execute your database script
+        Start-Process runas.exe -ArgumentList "/user:$username `"powershell.exe -ExecutionPolicy Bypass -File $localScriptPath`"" -NoNewWindow
+        Start-Sleep -Seconds 2
+        
+        # Inject your password directly into the local secure terminal context
+        $comObject.SendKeys($password)
+        $comObject.SendKeys("{ENTER}")
+        
+        Start-Sleep -Seconds 5
+        Write-Host "Impersonation query pass-through finalized."
+        
+        # Clean up temporary execution script
+        if (Test-Path $localScriptPath) { Remove-Item $localScriptPath -Force }

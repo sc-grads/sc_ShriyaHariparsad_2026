@@ -30,22 +30,24 @@ jobs:
           $devenv = $vsPath.Replace("devenv.exe", "devenv.com")
           Write-Host "Using Visual Studio Compiler: $devenv"
           
-          # 2. Find the Solution (.sln) file inside the checked out workspace directory
-          Write-Host "Searching inside workspace: $env:GITHUB_WORKSPACE"
-          cd $env:GITHUB_WORKSPACE
+          # 2. Step backward out of the double-nested workspace to find the root files
+          Write-Host "Current directory: $(Get-Location)"
+          $searchRoot = Resolve-Path "..\.."
+          Write-Host "Scanning expanded local path root: $searchRoot"
           
-          $slnFile = Get-ChildItem -Path . -Filter "TimesheetMigration.sln" -Recurse | Select-Object -First 1
+          # 3. Locate the Solution (.sln) file
+          $slnFile = Get-ChildItem -Path $searchRoot -Filter "TimesheetMigration.sln" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($null -eq $slnFile) {
-              Write-Error "Could not find TimesheetMigration.sln anywhere inside the repository workspace!"
+              Write-Error "Could not find TimesheetMigration.sln anywhere in the expanded directory space!"
               exit 1
           }
           $solutionPath = $slnFile.FullName
           Write-Host "Found Solution file at: $solutionPath"
           
-          # 3. Find the project folder and map the .ispac deployment target
-          $dtprojFile = Get-ChildItem -Path . -Filter "TimesheetMigration.dtproj" -Recurse | Select-Object -First 1
+          # 4. Locate the Project (.dtproj) file
+          $dtprojFile = Get-ChildItem -Path $searchRoot -Filter "TimesheetMigration.dtproj" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($null -eq $dtprojFile) {
-              Write-Error "Could not find TimesheetMigration.dtproj anywhere inside the repository workspace!"
+              Write-Error "Could not find TimesheetMigration.dtproj anywhere in the expanded directory space!"
               exit 1
           }
           $ispacFolder = Join-Path $dtprojFile.DirectoryName "bin\Development"
@@ -54,7 +56,7 @@ jobs:
           # Pass the discovered path to the next step dynamically
           echo "RESOLVED_ISPAC_PATH=$ispacPath" >> $env:GITHUB_ENV
           
-          # 4. Compile the SSIS Solution
+          # 5. Compile the SSIS Solution
           Write-Host "Compiling solution..."
           & $devenv "$solutionPath" /Build "Development"
           

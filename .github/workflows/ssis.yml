@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          clean: true # Forces the runner to wipe out stale cache and sync folders completely
 
       - name: Locate Visual Studio and Build SSIS Solution
         shell: powershell
@@ -33,7 +35,13 @@ jobs:
           # 2. Find the Solution (.sln) file dynamically in your repository
           $slnFile = Get-ChildItem -Path . -Filter "TimesheetMigration.sln" -Recurse | Select-Object -First 1
           if ($null -eq $slnFile) {
-              Write-Error "Could not find TimesheetMigration.sln anywhere in the workspace!"
+              Write-Host "WARNING: Global recursive scan missed it. Checking hardcoded folder layout..."
+              $slnFile = Get-ChildItem -Path "Timesheet_Project" -Filter "TimesheetMigration.sln" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          }
+          
+          if ($null -eq $slnFile) {
+              Write-Error "Could not find TimesheetMigration.sln anywhere in the workspace! Printing workspace items:"
+              Get-ChildItem -Name
               exit 1
           }
           $solutionPath = $slnFile.FullName

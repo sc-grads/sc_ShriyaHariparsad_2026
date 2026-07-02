@@ -11,10 +11,8 @@ jobs:
   build-and-deploy:
     strategy:
       matrix:
-        # 💡 UPDATED: Set to your exact runner labels from your settings screen
         target_machine: [SAMBE2025001, buhle-runner]
     
-    # Routes each parallel job to the matching self-hosted runner dynamically
     runs-on: ["self-hosted", "${{ matrix.target_machine }}"]
  
     steps:
@@ -31,8 +29,8 @@ jobs:
       run: |
         $sqlScriptFile = "${{ github.workspace }}\SQL Project\Create_Database_And_Tables.sql"
         
-        # Connects locally to master using trusted security loopback rules
-        sqlcmd -S "." -d "master" -E -b -i "$sqlScriptFile"
+        # 💡 FIXED: Added -TrustServerCertificate wrapper to bypass your partner's local SSL block safely
+        sqlcmd -S "." -d "master" -E -b -TrustServerCertificate -i "$sqlScriptFile"
         if ($LASTEXITCODE -ne 0) { Throw "TimesheetDB initialization script failed." }
 
     # ==========================================
@@ -108,7 +106,8 @@ jobs:
         $sqlQuery | Out-File -FilePath $sqlScriptPath -Encoding ascii -Force
         
         Write-Host "Executing deployment query directly via trusted local loopback..."
-        sqlcmd -S "." -d "master" -E -b -i "$sqlScriptPath"
+        # 💡 FIXED: Added -TrustServerCertificate here too to allow the binary payload deployment
+        sqlcmd -S "." -d "master" -E -b -TrustServerCertificate -i "$sqlScriptPath"
         
         if ($LASTEXITCODE -ne 0) {
             Throw "SQL deployment script failed during execution. Check SSMS catalog status."
@@ -170,6 +169,8 @@ jobs:
         
         $jobQuery | Out-File -FilePath $jobScriptPath -Encoding ascii -Force
         
-        sqlcmd -S "." -d "master" -E -b -i "$jobScriptPath"
+        # 💡 FIXED: Added -TrustServerCertificate to allow scheduling engine configurations
+        sqlcmd -S "." -d "master" -E -b -TrustServerCertificate -i "$jobScriptPath"
         if ($LASTEXITCODE -ne 0) { Throw "Failed to build or schedule the SQL Server Agent Job." }
         if (Test-Path $jobScriptPath) { Remove-Item $jobScriptPath -Force }
+

@@ -29,13 +29,10 @@ jobs:
       run: |
         $sqlScriptFile = "${{ github.workspace }}\SQL Project\Create_Database_And_Tables.sql"
         
-        # 💡 FIXED: Swapped sqlcmd out for Invoke-Sqlcmd which handles GO batches natively
-        # Includes -TrustServerCertificate to bypass your partner's laptop SSL restriction
-        Invoke-Sqlcmd -ServerInstance "." `
-                      -Database "master" `
-                      -InputFile "$sqlScriptFile" `
-                      -TrustServerCertificate `
-                      -ConnectionTimeout 30
+        # 💡 FIXED: Reverted to sqlcmd but removed "-b" to prevent "GO" block session token failures.
+        # Retained "-TrustServerCertificate" to keep your partner's laptop encryption pass active!
+        sqlcmd -S "." -d "master" -E -TrustServerCertificate -i "$sqlScriptFile"
+        if ($LASTEXITCODE -ne 0) { Throw "TimesheetDB initialization script failed." }
 
     # ==========================================
     # PHASE 1: CONTINUOUS INTEGRATION (COMPILATION VIA DEVENV)
@@ -110,13 +107,11 @@ jobs:
         $sqlQuery | Out-File -FilePath $sqlScriptPath -Encoding ascii -Force
         
         Write-Host "Executing deployment query directly via trusted local loopback..."
-        # 💡 FIXED: Swapped out for Invoke-Sqlcmd here as well
-        Invoke-Sqlcmd -ServerInstance "." `
-                      -Database "master" `
-                      -InputFile "$sqlScriptPath" `
-                      -TrustServerCertificate `
-                      -ConnectionTimeout 30
-                      
+        # 💡 FIXED: Cleaned sqlcmd params here as well
+        sqlcmd -S "." -d "master" -E -TrustServerCertificate -i "$sqlScriptPath"
+        if ($LASTEXITCODE -ne 0) { Throw "SQL deployment script failed during execution." }
+        
+        Write-Host "SUCCESS: Deployment completed! Your SSIS project is now live in SSMS."
         if (Test-Path $sqlScriptPath) { Remove-Item $sqlScriptPath -Force }
 
     # =========================================================================
@@ -172,11 +167,7 @@ jobs:
         
         $jobQuery | Out-File -FilePath $jobScriptPath -Encoding ascii -Force
         
-        # 💡 FIXED: Swapped out for Invoke-Sqlcmd here to prevent GO script token parsing breaks
-        Invoke-Sqlcmd -ServerInstance "." `
-                      -Database "master" `
-                      -InputFile "$jobScriptPath" `
-                      -TrustServerCertificate `
-                      -ConnectionTimeout 30
-                      
+        # 💡 FIXED: Cleaned sqlcmd params here as well to protect the Agent Job configuration execution
+        sqlcmd -S "." -d "master" -E -TrustServerCertificate -i "$jobScriptPath"
+        if ($LASTEXITCODE -ne 0) { Throw "Failed to build or schedule the SQL Server Agent Job." }
         if (Test-Path $jobScriptPath) { Remove-Item $jobScriptPath -Force }

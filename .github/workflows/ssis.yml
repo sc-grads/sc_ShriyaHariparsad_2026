@@ -17,16 +17,14 @@ jobs:
       with:
         submodules: false  
  
-    
-    # AUTOMATIC DATABASE & TABLE CREATION (TARGETING TIMESHEETDB)
-    
+    # =========================================================================
+    # PHASE 0: AUTOMATIC DATABASE & TABLE CREATION (TARGETING TIMESHEETDB)
+    # =========================================================================
     - name: Ensure Database and Schema Tables Exist
       shell: powershell
       run: |
+        # 💡 CLEANED: Points directly to your specific file inside SQL Project only
         $sqlScriptFile = "${{ github.workspace }}\SQL Project\Create_Database_And_Tables.sql"
-        if (-not (Test-Path $sqlScriptFile)) {
-            $sqlScriptFile = "${{ github.workspace }}\Database_Scripts\Create_Database_And_Tables.sql"
-        }
         
         sqlcmd -S "." -d "master" -E -b -i "$sqlScriptFile"
         if ($LASTEXITCODE -ne 0) { Throw "TimesheetDB initialization script failed." }

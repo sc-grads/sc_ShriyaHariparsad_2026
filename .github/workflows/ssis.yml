@@ -31,13 +31,10 @@ jobs:
         Write-Host "Reading SQL Schema code from: $sqlScriptFile"
         $sqlContent = Get-Content -Path $sqlScriptFile -Raw
         
-        # 💡 FIXED: Uses native .NET Core assemblies to read and split the script by 'GO' commands
-        # This completely eliminates driver token validation crashes on both laptops
         $connStr = "Data Source=.;Initial Catalog=master;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;"
         $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
         $connection.Open()
         
-        # Split the text file cleanly into individual execution commands by looking for GO batches
         $batches = [regex]::Split($sqlContent, "^\s*GO\s*$", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline)
         
         foreach ($batch in $batches) {
@@ -106,7 +103,6 @@ jobs:
         $fileBytes = [System.IO.File]::ReadAllBytes($projectPath)
         $hexString = "0x" + [System.BitConverter]::ToString($fileBytes).Replace("-", "")
         
-        # 💡 FIXED: Uses the same direct .NET pipeline for Phase 2 to push the binary artifact safely
         $connStr = "Data Source=.;Initial Catalog=master;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;"
         $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
         $connection.Open()
@@ -126,7 +122,8 @@ jobs:
         
         $command = $connection.CreateCommand()
         $command.CommandText = $sqlQuery
-        $command.ExecuteNonQuery() | Out-File -Null
+        # 💡 FIXED: Changed 'Out-File -Null' to 'Out-Null' here to resolve the error
+        $command.ExecuteNonQuery() | Out-Null
         $connection.Close()
         Write-Host "SUCCESS: SSIS Deployment completed cleanly!"
 
@@ -137,7 +134,6 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
-        # 💡 FIXED: Uses .NET parsing logic here as well to process the job creation script and split its GO statements smoothly
         $connStr = "Data Source=.;Initial Catalog=master;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;"
         $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
         $connection.Open()

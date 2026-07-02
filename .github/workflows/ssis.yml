@@ -73,23 +73,23 @@ jobs:
         $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
         $connection.Open()
         
-        # 💡 DUAL DEPLOYMENT ENGINE:
-        # This loops twice to create two separate folders in SSISDB: 'TimesheetDeployments' and 'TimesheetDeployments_SH'
         $folders = @("TimesheetDeployments", "TimesheetDeployments_SH")
         
         foreach ($folderName in $folders) {
-            $sqlQuery = @"
-            SET NOCOUNT ON;
-            IF NOT EXISTS (SELECT 1 FROM [SSISDB].[catalog].[folders] WHERE name = '$folderName')
-            BEGIN
-                EXEC [SSISDB].[catalog].[create_folder] @folder_name = '$folderName';
-            END
-            DECLARE @project_binary VARBINARY(MAX) = $hexString;
-            EXEC [SSISDB].[catalog].[deploy_project]
-                @folder_name = '$folderName',
-                @project_name = '$projectName',
-                @project_stream = @project_binary;
-"@
+            # 💡 FIXED: Uses standard array joining to keep indentation completely uniform
+            $sqlQuery = @(
+                "SET NOCOUNT ON;",
+                "IF NOT EXISTS (SELECT 1 FROM [SSISDB].[catalog].[folders] WHERE name = '$folderName')",
+                "BEGIN",
+                "    EXEC [SSISDB].[catalog].[create_folder] @folder_name = '$folderName';",
+                "END",
+                "DECLARE @project_binary VARBINARY(MAX) = $hexString;",
+                "EXEC [SSISDB].[catalog].[deploy_project]",
+                "    @folder_name = '$folderName',",
+                "    @project_name = '$projectName',",
+                "    @project_stream = @project_binary;"
+            ) -join "`n"
+
             $command = $connection.CreateCommand()
             $command.CommandText = $sqlQuery
             $command.ExecuteNonQuery() | Out-Null
@@ -108,8 +108,6 @@ jobs:
         $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
         $connection.Open()
         
-        # 💡 DUAL SCHEDULER ENGINE:
-        # This builds two separate SQL Agent Jobs that run independently side-by-side on both laptops!
         $jobConfigs = @(
             @{ JobName = "Run_Timesheet_ETL_Job"; Folder = "TimesheetDeployments" },
             @{ JobName = "Run_Timesheet_ETL_Job_SH"; Folder = "TimesheetDeployments_SH" }
@@ -119,47 +117,18 @@ jobs:
             $jobName = $config.JobName
             $folderName = $config.Folder
             
-            $jobQuery = @"
-            USE msdb;
-            GO
-
-            IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'$jobName')
-            BEGIN
-                EXEC dbo.sp_delete_job @job_name = N'$jobName', @delete_unused_schedule = 1;
-            END;
-
-            EXEC dbo.sp_add_job 
-                @job_name = N'$jobName', 
-                @enabled = 1, 
-                @description = N'Automated timesheet ETL background loop configuration.',
-                @category_name = N'[Uncategorized (Local)]',
-                @owner_login_name = N'sa';
-
-            EXEC msdb.dbo.sp_add_jobstep 
-                @job_name = N'$jobName', 
-                @step_name = N'Execute_SSIS_Timesheet_Package', 
-                @step_id = 1, 
-                @cmdexec_success_code = 0, 
-                @on_success_action = 1, 
-                @on_fail_action = 2,    
-                @subsystem = N'SSIS',   
-                @command = N'/ISSERVER "\"\SSISDB\$folderName\TimesheetMigration\Package.dtsx\"" /SERVER "\".\""',
-                @database_name = N'master';
-
-            EXEC dbo.sp_add_jobschedule 
-                @job_name = N'$jobName', 
-                @name = N'$jobName\_Interval_Schedule', 
-                @enabled = 1, 
-                @freq_type = 8,              
-                @freq_interval = 62,         
-                @freq_subday_type = 4,       
-                @freq_subday_interval = 1,   
-                @freq_recurrence_factor = 1, 
-                @active_start_time = 080000, 
-                @active_end_time = 170000;   
-
-            EXEC dbo.sp_add_jobserver @job_name = N'$jobName', @server_name = N'(local)';
-"@
+            # 💡 FIXED: Array layout eliminates here-string constraints entirely
+            $jobQuery = @(
+                "USE msdb;",
+                "IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'$jobName')",
+                "BEGIN",
+                "    EXEC dbo.sp_delete_job @job_name = N'$jobName', @delete_unused_schedule = 1;",
+                "END;",
+                "EXEC dbo.sp_add_job @job_name = N'$jobName', @enabled = 1, @description = N'Automated timesheet ETL background loop configuration.', @category_name = N'[Uncategorized (Local)]', @owner_login_name = N'sa';",
+                "EXEC msdb.dbo.sp_add_jobstep @job_name = N'$jobName', @step_name = N'Execute_SSIS_Timesheet_Package', @step_id = 1, @cmdexec_success_code = 0, @on_success_action = 1, @on_fail_action = 2, @subsystem = N'SSIS', @command = N'/ISSERVER `"`"\SSISDB\$folderName\TimesheetMigration\Package.dtsx`"`" /SERVER `"`".`"`"', @database_name = N'master';",
+                "EXEC dbo.sp_add_jobschedule @job_name = N'$jobName', @name = N'${jobName}_Interval_Schedule', @enabled = 1, @freq_type = 8, @freq_interval = 62, @freq_subday_type = 4, @freq_subday_interval = 1, @freq_recurrence_factor = 1, @active_start_time = 080000, @active_end_time = 170000;",
+                "EXEC dbo.sp_add_jobserver @job_name = N'$jobName', @server_name = N'(local)';"
+            ) -join "`n"
             
             $batches = [regex]::Split($jobQuery, "^\s*GO\s*$", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline)
             foreach ($batch in $batches) {

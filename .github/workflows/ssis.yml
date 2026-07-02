@@ -9,7 +9,8 @@ on:
  
 jobs:
   build-and-deploy:
-    runs-on: self-hosted
+    # 💡 UPDATED: Targets ONLY your specific local machine runner directly
+    runs-on: ["self-hosted", "my-laptop"]
  
     steps:
     - name: Checkout Repository
@@ -17,6 +18,22 @@ jobs:
       with:
         submodules: false  
  
+    # =========================================================================
+    # PHASE 0: AUTOMATIC DATABASE & TABLE CREATION (TARGETING TIMESHEETDB)
+    # =========================================================================
+    - name: Ensure Database and Schema Tables Exist
+      shell: powershell
+      run: |
+        # Dynamically locates your table initialization script inside your repository workspace
+        $sqlScriptFile = "${{ github.workspace }}\SQL Project\Create_Database_And_Tables.sql"
+        if (-not (Test-Path $sqlScriptFile)) {
+            $sqlScriptFile = "${{ github.workspace }}\Database_Scripts\Create_Database_And_Tables.sql"
+        }
+        
+        # Connects locally to master first because your script handles its own "CREATE DATABASE TimesheetDB" logic internally
+        sqlcmd -S "." -d "master" -E -b -i "$sqlScriptFile"
+        if ($LASTEXITCODE -ne 0) { Throw "TimesheetDB initialization script failed." }
+
     # ==========================================
     # PHASE 1: CONTINUOUS INTEGRATION (COMPILATION VIA DEVENV)
     # ==========================================
@@ -40,11 +57,14 @@ jobs:
     - name: Build SSIS Project to ISPAC
       shell: powershell
       run: |
-        & "${{ env.DEVENV_PATH }}" "C:\sc_ShriyaHariparsad_2026\Timesheet_Project\TimesheetMigration\TimesheetMigration\TimesheetMigration.dtproj" /Build "Development"
+        # Compiles the SSIS project from your fresh downloaded runner workspace
+        $dtprojPath = "${{ github.workspace }}\Timesheet_Project\TimesheetMigration\TimesheetMigration\TimesheetMigration.dtproj"
+        & "${{ env.DEVENV_PATH }}" "$dtprojPath" /Build "Development"
        
-        $targetIspacPath = "C:\sc_ShriyaHariparsad_2026\Timesheet_Project\TimesheetMigration\TimesheetMigration\bin\Development\TimesheetMigration.ispac"
+        $targetIspacPath = "${{ github.workspace }}\Timesheet_Project\TimesheetMigration\TimesheetMigration\bin\Development\TimesheetMigration.ispac"
         if (Test-Path $targetIspacPath) {
             Write-Host "Success: .ispac deployment bundle created cleanly."
+            echo "ISPAC_PATH=$targetIspacPath" | Out-File -FilePath $env:GITHUB_ENV -Append
         } else {
             Throw "Build completed, but the compiled .ispac artifact was not found inside the target bin path."
         }
@@ -53,7 +73,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ssis-deployment-package
-        path: C:\sc_ShriyaHariparsad_2026\Timesheet_Project\TimesheetMigration\TimesheetMigration\bin\Development\TimesheetMigration.ispac
+        path: ${{ env.ISPAC_PATH }}
  
     # ==========================================
     # PHASE 2: CONTINUOUS DEPLOYMENT (ZERO-PASSWORD INJECTION)
@@ -62,7 +82,7 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
-        $projectPath = "C:\sc_ShriyaHariparsad_2026\Timesheet_Project\TimesheetMigration\TimesheetMigration\bin\Development\TimesheetMigration.ispac"
+        $projectPath = "${{ env.ISPAC_PATH }}"
         $folderName = "TimesheetDeployments"
         $projectName = [System.IO.Path]::GetFileNameWithoutExtension($projectPath)
         
@@ -70,8 +90,7 @@ jobs:
         $fileBytes = [System.IO.File]::ReadAllBytes($projectPath)
         $hexString = "0x" + [System.BitConverter]::ToString($fileBytes).Replace("-", "")
         
-        # 1. Create a clean SQL script file on disk containing the binary payload
-        $sqlScriptPath = "C:\sc_ShriyaHariparsad_2026\deploy_execution_temp.sql"
+        $sqlScriptPath = "${{ github.workspace }}\deploy_execution_temp.sql"
         
         $sqlQuery = @"
         SET NOCOUNT ON;
@@ -88,16 +107,67 @@ jobs:
         
         $sqlQuery | Out-File -FilePath $sqlScriptPath -Encoding ascii -Force
         
-        # 2. Execute via native sqlcmd utilizing local machine loopback trusted security connection
         Write-Host "Executing deployment query directly via trusted local loopback..."
-        
-        sqlcmd -S "SAMBE2025001" -d "master" -E -b -i "$sqlScriptPath"
+        sqlcmd -S "." -d "master" -E -b -i "$sqlScriptPath"
         
         if ($LASTEXITCODE -ne 0) {
             Throw "SQL deployment script failed during execution. Check SSMS catalog status."
         }
         
         Write-Host "SUCCESS: Deployment completed! Your SSIS project is now live in SSMS."
-        
-        # 3. Clean up the temporary script file
         if (Test-Path $sqlScriptPath) { Remove-Item $sqlScriptPath -Force }
+
+    # =========================================================================
+    # PHASE 3: CREATE AGENT JOB & SCHEDULE IT FOR EVERY 1 MINUTE
+    # =========================================================================
+    - name: Configure 1-Minute SQL Agent Automated Scheduling Engine Job
+      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      shell: powershell
+      run: |
+        $jobScriptPath = "${{ github.workspace }}\agent_job_temp.sql"
+        
+        $jobQuery = @"
+        USE msdb;
+        GO
+
+        IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'Run_Timesheet_ETL_Job')
+        BEGIN
+            EXEC dbo.sp_delete_job @job_name = N'Run_Timesheet_ETL_Job', @delete_unused_schedule = 1;
+        END;
+
+        EXEC dbo.sp_add_job 
+            @job_name = N'Run_Timesheet_ETL_Job', 
+            @enabled = 1, 
+            @description = N'Runs the automated timesheet SSIS project workflow completely hands-free.',
+            @category_name = N'[Uncategorized (Local)]',
+            @owner_login_name = N'sa';
+
+        EXEC msdb.dbo.sp_add_jobstep 
+            @job_name = N'Run_Timesheet_ETL_Job', 
+            @step_name = N'Execute_SSIS_Timesheet_Package', 
+            @step_id = 1, 
+            @cmdexec_success_code = 0, 
+            @on_success_action = 1, 
+            @on_fail_action = 2,    
+            @subsystem = N'SSIS',   
+            @command = N'/ISSERVER "\"\SSISDB\TimesheetDeployments\TimesheetMigration\Package.dtsx\"" /SERVER "\".\"" /Par "\"$ServerOption::SYNCHRONIZED(Boolean)\"";True',
+            @database_name = N'master';
+
+        EXEC dbo.sp_add_jobschedule 
+            @job_name = N'Run_Timesheet_ETL_Job', 
+            @name = N'Timesheet_One_Minute_Interval_Schedule', 
+            @enabled = 1, 
+            @freq_type = 4,              
+            @freq_interval = 1,          
+            @freq_subday_type = 4,       
+            @freq_subday_interval = 1,   
+            @active_start_time = 000000; 
+
+        EXEC dbo.sp_add_jobserver @job_name = N'Run_Timesheet_ETL_Job', @server_name = N'(local)';
+        "@
+        
+        $jobQuery | Out-File -FilePath $jobScriptPath -Encoding ascii -Force
+        
+        sqlcmd -S "." -d "master" -E -b -i "$jobScriptPath"
+        if ($LASTEXITCODE -ne 0) { Throw "Failed to build or schedule the SQL Server Agent Job." }
+        if (Test-Path $jobScriptPath) { Remove-Item $jobScriptPath -Force }

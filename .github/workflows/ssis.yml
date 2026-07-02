@@ -17,9 +17,9 @@ jobs:
       with:
         submodules: false  
  
-    # =========================================================================
-    # PHASE 0: AUTOMATIC DATABASE & TABLE CREATION (TARGETING TIMESHEETDB)
-    # =========================================================================
+    
+    # AUTOMATIC DATABASE & TABLE CREATION (TARGETING TIMESHEETDB)
+    
     - name: Ensure Database and Schema Tables Exist
       shell: powershell
       run: |

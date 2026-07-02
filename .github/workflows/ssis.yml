@@ -11,6 +11,7 @@ jobs:
   build-and-deploy:
     strategy:
       matrix:
+        # 💡 Binds the execution path to your exact target machine runners
         target_machine: [SAMBE2025001, buhle-runner]
     
     runs-on: ["self-hosted", "${{ matrix.target_machine }}"]
@@ -20,9 +21,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: false  
-
-    # 💡 SAFE: Phase 0 has been completely removed. 
-    # GitHub will never touch, drop, or alter your partner's local database schemas or tables.
 
     # ==========================================
     # PHASE 1: CONTINUOUS INTEGRATION (COMPILATION VIA DEVENV)
@@ -132,7 +130,7 @@ jobs:
             @on_fail_action = 2,    
             @subsystem = N'SSIS',   
             @command = N'/ISSERVER "\"\SSISDB\TimesheetDeployments\TimesheetMigration\Package.dtsx\"" /SERVER "\".\""',
-            @database_name = N'master';
+            @database_name = N'master'; -- 💡 Anchor connection set to master so your SSIS package dynamically triggers its internal connection logic
 
         EXEC dbo.sp_add_jobschedule 
             @job_name = N'Run_Timesheet_ETL_Job', 

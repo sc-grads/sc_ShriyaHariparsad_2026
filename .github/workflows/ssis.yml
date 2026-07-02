@@ -146,7 +146,7 @@ jobs:
             @on_success_action = 1, 
             @on_fail_action = 2,    
             @subsystem = N'SSIS',   
-            @command = N'/ISSERVER "\"\SSISDB\TimesheetDeployments\TimesheetMigration\Package.dtsx\"" /SERVER "\".\"" /Par "\"$ServerOption::SYNCHRONIZED(Boolean)\"";True',
+            @command = N'/ISSERVER "\"\SSISDB\TimesheetDeployments\TimesheetMigration\Package.dtsx\"" /SERVER "\".\""',
             @database_name = N'master';
 
         EXEC dbo.sp_add_jobschedule 
@@ -157,7 +157,7 @@ jobs:
             @freq_interval = 62,         
             @freq_subday_type = 4,       
             @freq_subday_interval = 1,   
-            @freq_recurrence_factor = 1, -- 💡 FIXED: Injected parameter to repeat every single week
+            @freq_recurrence_factor = 1, 
             @active_start_time = 080000, 
             @active_end_time = 170000;   
 

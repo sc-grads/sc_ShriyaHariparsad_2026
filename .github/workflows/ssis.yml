@@ -21,9 +21,9 @@ jobs:
       with:
         submodules: false  
 
-    # ==========================================
-    # PHASE 1: CONTINUOUS INTEGRATION (COMPILATION VIA DEVENV)
-    # ==========================================
+    
+    # CONTINUOUS INTEGRATION (COMPILATION VIA DEVENV)
+    
     - name: Locate Visual Studio DevEnv Tool
       shell: powershell
       run: |
@@ -55,9 +55,9 @@ jobs:
             Throw "Build completed, but the compiled .ispac artifact was not found inside the target bin path."
         }
  
-    # ==========================================
-    # PHASE 2: DEPLOYMENT TO SSISDB CATALOG
-    # ==========================================
+    
+    # DEPLOYMENT TO SSISDB CATALOG
+    
     - name: Deploy Package to SSISDB Catalog
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
@@ -94,9 +94,9 @@ jobs:
         Write-Host "SUCCESS: Project deployed to SSISDB folder: $folderName"
         $connection.Close()
 
-    # =========================================================================
-    # PHASE 3: CREATE AGENT JOB & SCHEDULE (8AM-5PM MON-FRI)
-    # =========================================================================
+    
+    # CREATE AGENT JOB & SCHEDULE (8AM-5PM MON-FRI)
+    
     - name: Configure SQL Agent Automated Scheduling Engine Job
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell

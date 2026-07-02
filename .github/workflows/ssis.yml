@@ -11,7 +11,6 @@ jobs:
   build-and-deploy:
     strategy:
       matrix:
-        # 💡 Binds the execution path to your exact target machine runners
         target_machine: [SAMBE2025001, buhle-runner]
     
     runs-on: ["self-hosted", "${{ matrix.target_machine }}"]
@@ -57,14 +56,13 @@ jobs:
         }
  
     # ==========================================
-    # PHASE 2: CONTINUOUS DEPLOYMENT (ZERO-PASSWORD INJECTION)
+    # PHASE 2: DOUBLE DEPLOYMENT TO SSISDB CATALOG
     # ==========================================
-    - name: Deploy to SSISDB Catalog
+    - name: Deploy Both Packages to SSISDB Catalog
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
         $projectPath = "${{ env.ISPAC_PATH }}"
-        $folderName = "TimesheetDeployments"
         $projectName = [System.IO.Path]::GetFileNameWithoutExtension($projectPath)
         
         Write-Host "Reading $projectName binary package data..."
@@ -75,29 +73,34 @@ jobs:
         $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
         $connection.Open()
         
-        $sqlQuery = @"
-        SET NOCOUNT ON;
-        IF NOT EXISTS (SELECT 1 FROM [SSISDB].[catalog].[folders] WHERE name = '$folderName')
-        BEGIN
-            EXEC [SSISDB].[catalog].[create_folder] @folder_name = '$folderName';
-        END
-        DECLARE @project_binary VARBINARY(MAX) = $hexString;
-        EXEC [SSISDB].[catalog].[deploy_project]
-            @folder_name = '$folderName',
-            @project_name = '$projectName',
-            @project_stream = @project_binary;
-        "@
+        # 💡 DUAL DEPLOYMENT ENGINE:
+        # This loops twice to create two separate folders in SSISDB: 'TimesheetDeployments' and 'TimesheetDeployments_SH'
+        $folders = @("TimesheetDeployments", "TimesheetDeployments_SH")
         
-        $command = $connection.CreateCommand()
-        $command.CommandText = $sqlQuery
-        $command.ExecuteNonQuery() | Out-Null
+        foreach ($folderName in $folders) {
+            $sqlQuery = @"
+            SET NOCOUNT ON;
+            IF NOT EXISTS (SELECT 1 FROM [SSISDB].[catalog].[folders] WHERE name = '$folderName')
+            BEGIN
+                EXEC [SSISDB].[catalog].[create_folder] @folder_name = '$folderName';
+            END
+            DECLARE @project_binary VARBINARY(MAX) = $hexString;
+            EXEC [SSISDB].[catalog].[deploy_project]
+                @folder_name = '$folderName',
+                @project_name = '$projectName',
+                @project_stream = @project_binary;
+"@
+            $command = $connection.CreateCommand()
+            $command.CommandText = $sqlQuery
+            $command.ExecuteNonQuery() | Out-Null
+            Write-Host "SUCCESS: Project deployed to SSISDB folder: $folderName"
+        }
         $connection.Close()
-        Write-Host "SUCCESS: SSIS Deployment completed cleanly!"
 
     # =========================================================================
-    # PHASE 3: CREATE AGENT JOB & SCHEDULE IT FOR MON-FRI, 8AM-5PM ON A 1-MIN LOOP
+    # PHASE 3: CREATE AGENT JOBS & SCHEDULES FOR BOTH DATABASES (8AM-5PM MON-FRI)
     # =========================================================================
-    - name: Configure 1-Minute SQL Agent Automated Scheduling Engine Job
+    - name: Configure Both SQL Agent Automated Scheduling Engine Jobs
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
@@ -105,57 +108,68 @@ jobs:
         $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
         $connection.Open()
         
-        $jobQuery = @"
-        USE msdb;
-        GO
-
-        IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'Run_Timesheet_ETL_Job')
-        BEGIN
-            EXEC dbo.sp_delete_job @job_name = N'Run_Timesheet_ETL_Job', @delete_unused_schedule = 1;
-        END;
-
-        EXEC dbo.sp_add_job 
-            @job_name = N'Run_Timesheet_ETL_Job', 
-            @enabled = 1, 
-            @description = N'Runs the automated timesheet SSIS project workflow completely hands-free.',
-            @category_name = N'[Uncategorized (Local)]',
-            @owner_login_name = N'sa';
-
-        EXEC msdb.dbo.sp_add_jobstep 
-            @job_name = N'Run_Timesheet_ETL_Job', 
-            @step_name = N'Execute_SSIS_Timesheet_Package', 
-            @step_id = 1, 
-            @cmdexec_success_code = 0, 
-            @on_success_action = 1, 
-            @on_fail_action = 2,    
-            @subsystem = N'SSIS',   
-            @command = N'/ISSERVER "\"\SSISDB\TimesheetDeployments\TimesheetMigration\Package.dtsx\"" /SERVER "\".\""',
-            @database_name = N'master'; -- 💡 Anchor connection set to master so your SSIS package dynamically triggers its internal connection logic
-
-        EXEC dbo.sp_add_jobschedule 
-            @job_name = N'Run_Timesheet_ETL_Job', 
-            @name = N'Timesheet_One_Minute_Interval_Schedule', 
-            @enabled = 1, 
-            @freq_type = 8,              
-            @freq_interval = 62,         
-            @freq_subday_type = 4,       
-            @freq_subday_interval = 1,   
-            @freq_recurrence_factor = 1, 
-            @active_start_time = 080000, 
-            @active_end_time = 170000;   
-
-        EXEC dbo.sp_add_jobserver @job_name = N'Run_Timesheet_ETL_Job', @server_name = N'(local)';
-        "@
+        # 💡 DUAL SCHEDULER ENGINE:
+        # This builds two separate SQL Agent Jobs that run independently side-by-side on both laptops!
+        $jobConfigs = @(
+            @{ JobName = "Run_Timesheet_ETL_Job"; Folder = "TimesheetDeployments" },
+            @{ JobName = "Run_Timesheet_ETL_Job_SH"; Folder = "TimesheetDeployments_SH" }
+        )
         
-        $batches = [regex]::Split($jobQuery, "^\s*GO\s*$", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline)
-        
-        foreach ($batch in $batches) {
-            $trimmedBatch = $batch.Trim()
-            if ($trimmedBatch.Length -gt 0) {
-                $command = $connection.CreateCommand()
-                $command.CommandText = $trimmedBatch
-                $command.ExecuteNonQuery() | Out-Null
+        foreach ($config in $jobConfigs) {
+            $jobName = $config.JobName
+            $folderName = $config.Folder
+            
+            $jobQuery = @"
+            USE msdb;
+            GO
+
+            IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'$jobName')
+            BEGIN
+                EXEC dbo.sp_delete_job @job_name = N'$jobName', @delete_unused_schedule = 1;
+            END;
+
+            EXEC dbo.sp_add_job 
+                @job_name = N'$jobName', 
+                @enabled = 1, 
+                @description = N'Automated timesheet ETL background loop configuration.',
+                @category_name = N'[Uncategorized (Local)]',
+                @owner_login_name = N'sa';
+
+            EXEC msdb.dbo.sp_add_jobstep 
+                @job_name = N'$jobName', 
+                @step_name = N'Execute_SSIS_Timesheet_Package', 
+                @step_id = 1, 
+                @cmdexec_success_code = 0, 
+                @on_success_action = 1, 
+                @on_fail_action = 2,    
+                @subsystem = N'SSIS',   
+                @command = N'/ISSERVER "\"\SSISDB\$folderName\TimesheetMigration\Package.dtsx\"" /SERVER "\".\""',
+                @database_name = N'master';
+
+            EXEC dbo.sp_add_jobschedule 
+                @job_name = N'$jobName', 
+                @name = N'$jobName\_Interval_Schedule', 
+                @enabled = 1, 
+                @freq_type = 8,              
+                @freq_interval = 62,         
+                @freq_subday_type = 4,       
+                @freq_subday_interval = 1,   
+                @freq_recurrence_factor = 1, 
+                @active_start_time = 080000, 
+                @active_end_time = 170000;   
+
+            EXEC dbo.sp_add_jobserver @job_name = N'$jobName', @server_name = N'(local)';
+"@
+            
+            $batches = [regex]::Split($jobQuery, "^\s*GO\s*$", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline)
+            foreach ($batch in $batches) {
+                $trimmedBatch = $batch.Trim()
+                if ($trimmedBatch.Length -gt 0) {
+                    $command = $connection.CreateCommand()
+                    $command.CommandText = $trimmedBatch
+                    $command.ExecuteNonQuery() | Out-Null
+                }
             }
+            Write-Host "SUCCESS: SQL Agent Job configured successfully: $jobName"
         }
         $connection.Close()
-        Write-Host "SUCCESS: SQL Agent Scheduled Job built completely!"

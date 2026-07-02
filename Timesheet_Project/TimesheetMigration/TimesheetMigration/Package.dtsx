@@ -11,8 +11,8 @@
   DTS:LocaleID="7177"
   DTS:ObjectName="Package"
   DTS:PackageType="5"
-  DTS:VersionBuild="198"
-  DTS:VersionGUID="{002DB825-1B71-494B-9797-8E39BCCF13DC}">
+  DTS:VersionBuild="199"
+  DTS:VersionGUID="{4DF1E26A-68A5-481F-A30A-68740E9AFA76}">
   <DTS:Property
     DTS:Name="PackageFormatVersion">8</DTS:Property>
   <DTS:ConnectionManagers>
@@ -53,43 +53,6 @@
           DTS:ConnectRetryCount="1"
           DTS:ConnectRetryInterval="5"
           DTS:ConnectionString="Data Source=.;Initial Catalog=TimesheetDB_SH;Provider=SQLOLEDB.1;Integrated Security=SSPI;Application Name=SSIS-Package-{A9D24844-C830-4B36-A5E6-180228CEB33A}LocalHost.TimesheetDB_SH;Auto Translate=False;" />
-      </DTS:ObjectData>
-    </DTS:ConnectionManager>
-    <DTS:ConnectionManager
-      DTS:refId="Package.ConnectionManagers[SAMBE2025001.master]"
-      DTS:CreationName="OLEDB"
-      DTS:DTSID="{F4BE3D0A-BD9D-4AC7-9943-E0DD33FBB423}"
-      DTS:ObjectName="SAMBE2025001.master">
-      <DTS:ObjectData>
-        <DTS:ConnectionManager
-          DTS:ConnectRetryCount="1"
-          DTS:ConnectRetryInterval="5"
-          DTS:ConnectionString="Data Source=SAMBE2025001;Initial Catalog=master;Provider=MSOLEDBSQL.1;Integrated Security=SSPI;Application Name=SSIS-Package-{F4BE3D0A-BD9D-4AC7-9943-E0DD33FBB423}SAMBE2025001.master;Auto Translate=False;" />
-      </DTS:ObjectData>
-    </DTS:ConnectionManager>
-    <DTS:ConnectionManager
-      DTS:refId="Package.ConnectionManagers[SAMBE2025001.TimesheetDB]"
-      DTS:CreationName="OLEDB"
-      DTS:DelayValidation="True"
-      DTS:DTSID="{4213412A-DAC0-4E68-A9AE-1E71C66D30F2}"
-      DTS:ObjectName="SAMBE2025001.TimesheetDB">
-      <DTS:ObjectData>
-        <DTS:ConnectionManager
-          DTS:ConnectRetryCount="1"
-          DTS:ConnectRetryInterval="5"
-          DTS:ConnectionString="Data Source=SAMBE2025001;Initial Catalog=TimesheetDB_SH;Provider=MSOLEDBSQL.1;Integrated Security=SSPI;Auto Translate=False;Application Name=SSIS-Package-{4213412A-DAC0-4E68-A9AE-1E71C66D30F2}SAMBE2025001.TimesheetDB;" />
-      </DTS:ObjectData>
-    </DTS:ConnectionManager>
-    <DTS:ConnectionManager
-      DTS:refId="Package.ConnectionManagers[SAMBE2025001.TimesheetDB_SH]"
-      DTS:CreationName="OLEDB"
-      DTS:DTSID="{F7611676-8629-413D-BEA0-F19B496C1E5F}"
-      DTS:ObjectName="SAMBE2025001.TimesheetDB_SH">
-      <DTS:ObjectData>
-        <DTS:ConnectionManager
-          DTS:ConnectRetryCount="1"
-          DTS:ConnectRetryInterval="5"
-          DTS:ConnectionString="Data Source=.;Initial Catalog=TimesheetDB_SH;Provider=SQLOLEDB.1;Integrated Security=SSPI;Application Name=SSIS-Package-{F7611676-8629-413D-BEA0-F19B496C1E5F}SAMBE2025001.TimesheetDB_SH;" />
       </DTS:ObjectData>
     </DTS:ConnectionManager>
   </DTS:ConnectionManagers>

@@ -9,9 +9,7 @@ on:
  
 jobs:
   build-and-deploy:
-    # 💡 UPDATED: Targets ONLY your specific local machine runner directly
     runs-on: [self-hosted, SAMBE2025001]
-
  
     steps:
     - name: Checkout Repository
@@ -25,13 +23,11 @@ jobs:
     - name: Ensure Database and Schema Tables Exist
       shell: powershell
       run: |
-        # Dynamically locates your table initialization script inside your repository workspace
         $sqlScriptFile = "${{ github.workspace }}\SQL Project\Create_Database_And_Tables.sql"
         if (-not (Test-Path $sqlScriptFile)) {
             $sqlScriptFile = "${{ github.workspace }}\Database_Scripts\Create_Database_And_Tables.sql"
         }
         
-        # Connects locally to master first because your script handles its own "CREATE DATABASE TimesheetDB" logic internally
         sqlcmd -S "." -d "master" -E -b -i "$sqlScriptFile"
         if ($LASTEXITCODE -ne 0) { Throw "TimesheetDB initialization script failed." }
 
@@ -58,7 +54,6 @@ jobs:
     - name: Build SSIS Project to ISPAC
       shell: powershell
       run: |
-        # Compiles the SSIS project from your fresh downloaded runner workspace
         $dtprojPath = "${{ github.workspace }}\Timesheet_Project\TimesheetMigration\TimesheetMigration\TimesheetMigration.dtproj"
         & "${{ env.DEVENV_PATH }}" "$dtprojPath" /Build "Development"
        
@@ -119,7 +114,7 @@ jobs:
         if (Test-Path $sqlScriptPath) { Remove-Item $sqlScriptPath -Force }
 
     # =========================================================================
-    # PHASE 3: CREATE AGENT JOB & SCHEDULE IT FOR EVERY 1 MINUTE
+    # PHASE 3: CREATE AGENT JOB & SCHEDULE IT FOR MON-FRI, 8AM-5PM ON A 1-MIN LOOP
     # =========================================================================
     - name: Configure 1-Minute SQL Agent Automated Scheduling Engine Job
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -158,11 +153,12 @@ jobs:
             @job_name = N'Run_Timesheet_ETL_Job', 
             @name = N'Timesheet_One_Minute_Interval_Schedule', 
             @enabled = 1, 
-            @freq_type = 4,              
-            @freq_interval = 1,          
+            @freq_type = 8,              -- 💡 UPDATED: 8 = Weekly frequency constraint rule
+            @freq_interval = 62,         -- 💡 UPDATED: 62 = Monday through Friday only
             @freq_subday_type = 4,       
             @freq_subday_interval = 1,   
-            @active_start_time = 000000; 
+            @active_start_time = 080000, 
+            @active_end_time = 170000;   
 
         EXEC dbo.sp_add_jobserver @job_name = N'Run_Timesheet_ETL_Job', @server_name = N'(local)';
         "@

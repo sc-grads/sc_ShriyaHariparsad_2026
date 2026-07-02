@@ -153,10 +153,11 @@ jobs:
             @job_name = N'Run_Timesheet_ETL_Job', 
             @name = N'Timesheet_One_Minute_Interval_Schedule', 
             @enabled = 1, 
-            @freq_type = 8,              -- 💡 UPDATED: 8 = Weekly frequency constraint rule
-            @freq_interval = 62,         -- 💡 UPDATED: 62 = Monday through Friday only
+            @freq_type = 8,              
+            @freq_interval = 62,         
             @freq_subday_type = 4,       
             @freq_subday_interval = 1,   
+            @freq_recurrence_factor = 1, -- 💡 FIXED: Injected parameter to repeat every single week
             @active_start_time = 080000, 
             @active_end_time = 170000;   
 

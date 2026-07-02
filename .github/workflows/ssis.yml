@@ -9,7 +9,13 @@ on:
  
 jobs:
   build-and-deploy:
-    runs-on: [self-hosted, SAMBE2025001]
+    strategy:
+      matrix:
+        # 💡 UPDATED: Set to your exact runner labels from your settings screen
+        target_machine: [SAMBE2025001, buhle-runner]
+    
+    # Routes each parallel job to the matching self-hosted runner dynamically
+    runs-on: ["self-hosted", "${{ matrix.target_machine }}"]
  
     steps:
     - name: Checkout Repository
@@ -23,9 +29,9 @@ jobs:
     - name: Ensure Database and Schema Tables Exist
       shell: powershell
       run: |
-        # 💡 CLEANED: Points directly to your specific file inside SQL Project only
         $sqlScriptFile = "${{ github.workspace }}\SQL Project\Create_Database_And_Tables.sql"
         
+        # Connects locally to master using trusted security loopback rules
         sqlcmd -S "." -d "master" -E -b -i "$sqlScriptFile"
         if ($LASTEXITCODE -ne 0) { Throw "TimesheetDB initialization script failed." }
 
@@ -66,7 +72,7 @@ jobs:
     - name: Upload Compiled Package Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ssis-deployment-package
+        name: ssis-deployment-package-${{ matrix.target_machine }}
         path: ${{ env.ISPAC_PATH }}
  
     # ==========================================

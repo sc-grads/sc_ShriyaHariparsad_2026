@@ -10,7 +10,7 @@ on:
 jobs:
   build-and-deploy:
     # 💡 UPDATED: Targets ONLY your specific local machine runner directly
-    runs-on: ["self-hosted", "my-laptop"]
+    runs-on: ["self-hosted", "SAMBE2025001"]
  
     steps:
     - name: Checkout Repository

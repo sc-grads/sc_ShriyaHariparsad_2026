@@ -56,9 +56,9 @@ jobs:
         }
  
     # ==========================================
-    # PHASE 2: DOUBLE DEPLOYMENT TO SSISDB CATALOG
+    # PHASE 2: DEPLOYMENT TO SSISDB CATALOG
     # ==========================================
-    - name: Deploy Both Packages to SSISDB Catalog
+    - name: Deploy Package to SSISDB Catalog
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
@@ -73,34 +73,31 @@ jobs:
         $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
         $connection.Open()
         
-        $folders = @("TimesheetDeployments", "TimesheetDeployments_SH")
+        $folderName = "TimesheetDeployments"
         
-        foreach ($folderName in $folders) {
-            # 💡 FIXED: Uses standard array joining to keep indentation completely uniform
-            $sqlQuery = @(
-                "SET NOCOUNT ON;",
-                "IF NOT EXISTS (SELECT 1 FROM [SSISDB].[catalog].[folders] WHERE name = '$folderName')",
-                "BEGIN",
-                "    EXEC [SSISDB].[catalog].[create_folder] @folder_name = '$folderName';",
-                "END",
-                "DECLARE @project_binary VARBINARY(MAX) = $hexString;",
-                "EXEC [SSISDB].[catalog].[deploy_project]",
-                "    @folder_name = '$folderName',",
-                "    @project_name = '$projectName',",
-                "    @project_stream = @project_binary;"
-            ) -join "`n"
+        $sqlQuery = @(
+            "SET NOCOUNT ON;",
+            "IF NOT EXISTS (SELECT 1 FROM [SSISDB].[catalog].[folders] WHERE name = '$folderName')",
+            "BEGIN",
+            "    EXEC [SSISDB].[catalog].[create_folder] @folder_name = '$folderName';",
+            "END",
+            "DECLARE @project_binary VARBINARY(MAX) = $hexString;",
+            "EXEC [SSISDB].[catalog].[deploy_project]",
+            "    @folder_name = '$folderName',",
+            "    @project_name = '$projectName',",
+            "    @project_stream = @project_binary;"
+        ) -join "`n"
 
-            $command = $connection.CreateCommand()
-            $command.CommandText = $sqlQuery
-            $command.ExecuteNonQuery() | Out-Null
-            Write-Host "SUCCESS: Project deployed to SSISDB folder: $folderName"
-        }
+        $command = $connection.CreateCommand()
+        $command.CommandText = $sqlQuery
+        $command.ExecuteNonQuery() | Out-Null
+        Write-Host "SUCCESS: Project deployed to SSISDB folder: $folderName"
         $connection.Close()
 
     # =========================================================================
-    # PHASE 3: CREATE AGENT JOBS & SCHEDULES FOR BOTH DATABASES (8AM-5PM MON-FRI)
+    # PHASE 3: CREATE AGENT JOB & SCHEDULE (8AM-5PM MON-FRI)
     # =========================================================================
-    - name: Configure Both SQL Agent Automated Scheduling Engine Jobs
+    - name: Configure SQL Agent Automated Scheduling Engine Job
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
@@ -108,37 +105,29 @@ jobs:
         $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
         $connection.Open()
         
-        $jobConfigs = @(
-            @{ JobName = "Run_Timesheet_ETL_Job"; Folder = "TimesheetDeployments" },
-            @{ JobName = "Run_Timesheet_ETL_Job_SH"; Folder = "TimesheetDeployments_SH" }
-        )
+        $jobName = "Run_Timesheet_ETL_Job"
+        $folderName = "TimesheetDeployments"
         
-        foreach ($config in $jobConfigs) {
-            $jobName = $config.JobName
-            $folderName = $config.Folder
-            
-            # 💡 FIXED: Array layout eliminates here-string constraints entirely
-            $jobQuery = @(
-                "USE msdb;",
-                "IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'$jobName')",
-                "BEGIN",
-                "    EXEC dbo.sp_delete_job @job_name = N'$jobName', @delete_unused_schedule = 1;",
-                "END;",
-                "EXEC dbo.sp_add_job @job_name = N'$jobName', @enabled = 1, @description = N'Automated timesheet ETL background loop configuration.', @category_name = N'[Uncategorized (Local)]', @owner_login_name = N'sa';",
-                "EXEC msdb.dbo.sp_add_jobstep @job_name = N'$jobName', @step_name = N'Execute_SSIS_Timesheet_Package', @step_id = 1, @cmdexec_success_code = 0, @on_success_action = 1, @on_fail_action = 2, @subsystem = N'SSIS', @command = N'/ISSERVER `"`"\SSISDB\$folderName\TimesheetMigration\Package.dtsx`"`" /SERVER `"`".`"`"', @database_name = N'master';",
-                "EXEC dbo.sp_add_jobschedule @job_name = N'$jobName', @name = N'${jobName}_Interval_Schedule', @enabled = 1, @freq_type = 8, @freq_interval = 62, @freq_subday_type = 4, @freq_subday_interval = 1, @freq_recurrence_factor = 1, @active_start_time = 080000, @active_end_time = 170000;",
-                "EXEC dbo.sp_add_jobserver @job_name = N'$jobName', @server_name = N'(local)';"
-            ) -join "`n"
-            
-            $batches = [regex]::Split($jobQuery, "^\s*GO\s*$", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline)
-            foreach ($batch in $batches) {
-                $trimmedBatch = $batch.Trim()
-                if ($trimmedBatch.Length -gt 0) {
-                    $command = $connection.CreateCommand()
-                    $command.CommandText = $trimmedBatch
-                    $command.ExecuteNonQuery() | Out-Null
-                }
+        $jobQuery = @(
+            "USE msdb;",
+            "IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'$jobName')",
+            "BEGIN",
+            "    EXEC dbo.sp_delete_job @job_name = N'$jobName', @delete_unused_schedule = 1;",
+            "END;",
+            "EXEC dbo.sp_add_job @job_name = N'$jobName', @enabled = 1, @description = N'Automated timesheet ETL background loop configuration.', @category_name = N'[Uncategorized (Local)]', @owner_login_name = N'sa';",
+            "EXEC msdb.dbo.sp_add_jobstep @job_name = N'$jobName', @step_name = N'Execute_SSIS_Timesheet_Package', @step_id = 1, @cmdexec_success_code = 0, @on_success_action = 1, @on_fail_action = 2, @subsystem = N'SSIS', @command = N'/ISSERVER `"`"\SSISDB\$folderName\TimesheetMigration\Package.dtsx`"`" /SERVER `"`".`"`"', @database_name = N'master';",
+            "EXEC dbo.sp_add_jobschedule @job_name = N'$jobName', @name = N'${jobName}_Interval_Schedule', @enabled = 1, @freq_type = 8, @freq_interval = 62, @freq_subday_type = 4, @freq_subday_interval = 1, @freq_recurrence_factor = 1, @active_start_time = 080000, @active_end_time = 170000;",
+            "EXEC dbo.sp_add_jobserver @job_name = N'$jobName', @server_name = N'(local)';"
+        ) -join "`n"
+        
+        $batches = [regex]::Split($jobQuery, "^\s*GO\s*$", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline)
+        foreach ($batch in $batches) {
+            $trimmedBatch = $batch.Trim()
+            if ($trimmedBatch.Length -gt 0) {
+                $command = $connection.CreateCommand()
+                $command.CommandText = $trimmedBatch
+                $command.ExecuteNonQuery() | Out-Null
             }
-            Write-Host "SUCCESS: SQL Agent Job configured successfully: $jobName"
         }
+        Write-Host "SUCCESS: SQL Agent Job configured successfully: $jobName"
         $connection.Close()

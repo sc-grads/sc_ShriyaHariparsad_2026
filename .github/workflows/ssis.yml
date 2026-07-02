@@ -28,11 +28,28 @@ jobs:
       shell: powershell
       run: |
         $sqlScriptFile = "${{ github.workspace }}\SQL Project\Create_Database_And_Tables.sql"
+        Write-Host "Reading SQL Schema code from: $sqlScriptFile"
+        $sqlContent = Get-Content -Path $sqlScriptFile -Raw
         
-        # 💡 FIXED: Reverted to sqlcmd but removed "-b" to prevent "GO" block session token failures.
-        # Retained "-TrustServerCertificate" to keep your partner's laptop encryption pass active!
-        sqlcmd -S "." -d "master" -E -TrustServerCertificate -i "$sqlScriptFile"
-        if ($LASTEXITCODE -ne 0) { Throw "TimesheetDB initialization script failed." }
+        # 💡 FIXED: Uses native .NET Core assemblies to read and split the script by 'GO' commands
+        # This completely eliminates driver token validation crashes on both laptops
+        $connStr = "Data Source=.;Initial Catalog=master;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;"
+        $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
+        $connection.Open()
+        
+        # Split the text file cleanly into individual execution commands by looking for GO batches
+        $batches = [regex]::Split($sqlContent, "^\s*GO\s*$", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline)
+        
+        foreach ($batch in $batches) {
+            $trimmedBatch = $batch.Trim()
+            if ($trimmedBatch.Length -gt 0) {
+                $command = $connection.CreateCommand()
+                $command.CommandText = $trimmedBatch
+                $command.ExecuteNonQuery() | Out-Null
+            }
+        }
+        $connection.Close()
+        Write-Host "SUCCESS: Database and schema structures deployed cleanly!"
 
     # ==========================================
     # PHASE 1: CONTINUOUS INTEGRATION (COMPILATION VIA DEVENV)
@@ -89,7 +106,10 @@ jobs:
         $fileBytes = [System.IO.File]::ReadAllBytes($projectPath)
         $hexString = "0x" + [System.BitConverter]::ToString($fileBytes).Replace("-", "")
         
-        $sqlScriptPath = "${{ github.workspace }}\deploy_execution_temp.sql"
+        # 💡 FIXED: Uses the same direct .NET pipeline for Phase 2 to push the binary artifact safely
+        $connStr = "Data Source=.;Initial Catalog=master;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;"
+        $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
+        $connection.Open()
         
         $sqlQuery = @"
         SET NOCOUNT ON;
@@ -104,15 +124,11 @@ jobs:
             @project_stream = @project_binary;
         "@
         
-        $sqlQuery | Out-File -FilePath $sqlScriptPath -Encoding ascii -Force
-        
-        Write-Host "Executing deployment query directly via trusted local loopback..."
-        # 💡 FIXED: Cleaned sqlcmd params here as well
-        sqlcmd -S "." -d "master" -E -TrustServerCertificate -i "$sqlScriptPath"
-        if ($LASTEXITCODE -ne 0) { Throw "SQL deployment script failed during execution." }
-        
-        Write-Host "SUCCESS: Deployment completed! Your SSIS project is now live in SSMS."
-        if (Test-Path $sqlScriptPath) { Remove-Item $sqlScriptPath -Force }
+        $command = $connection.CreateCommand()
+        $command.CommandText = $sqlQuery
+        $command.ExecuteNonQuery() | Out-File -Null
+        $connection.Close()
+        Write-Host "SUCCESS: SSIS Deployment completed cleanly!"
 
     # =========================================================================
     # PHASE 3: CREATE AGENT JOB & SCHEDULE IT FOR MON-FRI, 8AM-5PM ON A 1-MIN LOOP
@@ -121,7 +137,10 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
-        $jobScriptPath = "${{ github.workspace }}\agent_job_temp.sql"
+        # 💡 FIXED: Uses .NET parsing logic here as well to process the job creation script and split its GO statements smoothly
+        $connStr = "Data Source=.;Initial Catalog=master;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;"
+        $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
+        $connection.Open()
         
         $jobQuery = @"
         USE msdb;
@@ -165,9 +184,15 @@ jobs:
         EXEC dbo.sp_add_jobserver @job_name = N'Run_Timesheet_ETL_Job', @server_name = N'(local)';
         "@
         
-        $jobQuery | Out-File -FilePath $jobScriptPath -Encoding ascii -Force
+        $batches = [regex]::Split($jobQuery, "^\s*GO\s*$", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline)
         
-        # 💡 FIXED: Cleaned sqlcmd params here as well to protect the Agent Job configuration execution
-        sqlcmd -S "." -d "master" -E -TrustServerCertificate -i "$jobScriptPath"
-        if ($LASTEXITCODE -ne 0) { Throw "Failed to build or schedule the SQL Server Agent Job." }
-        if (Test-Path $jobScriptPath) { Remove-Item $jobScriptPath -Force }
+        foreach ($batch in $batches) {
+            $trimmedBatch = $batch.Trim()
+            if ($trimmedBatch.Length -gt 0) {
+                $command = $connection.CreateCommand()
+                $command.CommandText = $trimmedBatch
+                $command.ExecuteNonQuery() | Out-Null
+            }
+        }
+        $connection.Close()
+        Write-Host "SUCCESS: SQL Agent Scheduled Job built completely!"

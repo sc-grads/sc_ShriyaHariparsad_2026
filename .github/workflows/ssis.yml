@@ -20,33 +20,9 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: false  
- 
-    # =========================================================================
-    # PHASE 0: AUTOMATIC DATABASE & TABLE CREATION (TARGETING TIMESHEETDB)
-    # =========================================================================
-    - name: Ensure Database and Schema Tables Exist
-      shell: powershell
-      run: |
-        $sqlScriptFile = "${{ github.workspace }}\SQL Project\Create_Database_And_Tables.sql"
-        Write-Host "Reading SQL Schema code from: $sqlScriptFile"
-        $sqlContent = Get-Content -Path $sqlScriptFile -Raw
-        
-        $connStr = "Data Source=.;Initial Catalog=master;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;"
-        $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
-        $connection.Open()
-        
-        $batches = [regex]::Split($sqlContent, "^\s*GO\s*$", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline)
-        
-        foreach ($batch in $batches) {
-            $trimmedBatch = $batch.Trim()
-            if ($trimmedBatch.Length -gt 0) {
-                $command = $connection.CreateCommand()
-                $command.CommandText = $trimmedBatch
-                $command.ExecuteNonQuery() | Out-Null
-            }
-        }
-        $connection.Close()
-        Write-Host "SUCCESS: Database and schema structures deployed cleanly!"
+
+    # 💡 SAFE: Phase 0 has been completely removed. 
+    # GitHub will never touch, drop, or alter your partner's local database schemas or tables.
 
     # ==========================================
     # PHASE 1: CONTINUOUS INTEGRATION (COMPILATION VIA DEVENV)

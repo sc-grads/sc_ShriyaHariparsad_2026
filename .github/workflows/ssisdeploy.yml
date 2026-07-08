@@ -1,0 +1,181 @@
+name: Automation SSIS
+ 
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+ 
+jobs:
+  
+  # JOB 1: Deploy to SAMBE2025001 
+  
+  deploy-sambe:
+    name: deploy-Shriya / deploy
+    runs-on: piingy
+    
+    # Points to your existing production environment secrets
+    environment:
+      name: production
+ 
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: false  
+
+    # NOTIFY DEPLOYMENT STARTED
+    - name: Notify Deployment Started
+      shell: powershell
+      run: |
+        $timestamp = Get-Date -Format "yyyy-MM-dd"
+
+        $text = "SSIS DEPLOYMENT - STARTED`n`nCreator: ${{ github.actor }}`n`nEnvironment: production`n`nDate: $timestamp`n`nDeployment has started."
+
+        $payload = @{ text = $text } | ConvertTo-Json -Depth 1
+
+        Invoke-RestMethod `
+          -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+          -Method Post `
+          -Body $payload `
+          -ContentType "application/json"
+
+    # CONTINUOUS INTEGRATION 
+    - name: Locate Visual Studio DevEnv Tool
+      shell: powershell
+      run: |
+        $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property productPath
+        if (-not $vsPath) {
+            $vsPath = & "${env:ProgramFiles}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property productPath
+        }
+        $devenvDir = Split-Path $vsPath
+        $devenvCom = Join-Path $devenvDir "devenv.com"
+       
+        if (Test-Path $devenvCom) {
+            Write-Host "Found Visual Studio compiler at: $devenvCom"
+            echo "DEVENV_PATH=$devenvCom" | Out-File -FilePath $env:GITHUB_ENV -Append
+        } else {
+            Throw "CRITICAL ERROR: Visual Studio (devenv.com) was not found on this self-hosted runner."
+        }
+ 
+    - name: Build SSIS Project to ISPAC
+      shell: powershell
+      run: |
+        $dtprojPath = "${{ github.workspace }}\Timesheet_Project\TimesheetMigration\TimesheetMigration\TimesheetMigration.dtproj"
+        & "${{ env.DEVENV_PATH }}" "$dtprojPath" /Build "Development"
+       
+        $targetIspacPath = "${{ github.workspace }}\Timesheet_Project\TimesheetMigration\TimesheetMigration\bin\Development\TimesheetMigration.ispac"
+        if (Test-Path $targetIspacPath) {
+            Write-Host "Success: .ispac deployment bundle created cleanly."
+            echo "ISPAC_PATH=$targetIspacPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+        } else {
+            Throw "Build completed, but the compiled .ispac artifact was not found inside the target bin path."
+        }
+ 
+    # DEPLOYMENT TO SSISDB CATALOG
+    - name: Deploy Package to SSISDB Catalog
+      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      shell: powershell
+      run: |
+        $projectPath = "${{ env.ISPAC_PATH }}"
+        $projectName = [System.IO.Path]::GetFileNameWithoutExtension($projectPath)
+        
+        Write-Host "Reading $projectName binary package data..."
+        $fileBytes = [System.IO.File]::ReadAllBytes($projectPath)
+        $hexString = "0x" + [System.BitConverter]::ToString($fileBytes).Replace("-", "")
+        
+        $connStr = "Data Source=${{ secrets.PROJECT_URL }};Initial Catalog=master;User Id=${{ secrets.USER_NAME }};Password=${{ secrets.PASSWORD_SQL }};TrustServerCertificate=True;Encrypt=False;"
+        $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
+        $connection.Open()
+        
+        $folderName = "TimesheetDeployments"
+        
+        $sqlQuery = @(
+            "SET NOCOUNT ON;",
+            "IF NOT EXISTS (SELECT 1 FROM [SSISDB].[catalog].[folders] WHERE name = '$folderName')",
+            "BEGIN",
+            "    EXEC [SSISDB].[catalog].[create_folder] @folder_name = '$folderName';",
+            "END",
+            "DECLARE @project_binary VARBINARY(MAX) = $hexString;",
+            "EXEC [SSISDB].[catalog].[deploy_project]",
+            "    @folder_name = '$folderName',",
+            "    @project_name = '$projectName',",
+            "    @project_stream = @project_binary;"
+        ) -join "`n"
+
+        $command = $connection.CreateCommand()
+        $command.CommandText = $sqlQuery
+        $command.ExecuteNonQuery() | Out-Null
+        Write-Host "SUCCESS: Project deployed to SSISDB folder: $folderName"
+        $connection.Close()
+
+    # CREATE AGENT JOB & SCHEDULE (8AM-5PM MON-FRI)
+    - name: Configure SQL Agent Automated Scheduling Engine Job
+      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      shell: powershell
+      run: |
+        $connStr = "Data Source=${{ secrets.PROJECT_URL }};Initial Catalog=master;User Id=${{ secrets.USER_NAME }};Password=${{ secrets.PASSWORD_SQL }};TrustServerCertificate=True;Encrypt=False;"
+        $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
+        $connection.Open()
+        
+        $jobName = "Run_Timesheet_ETL_Job"
+        $folderName = "TimesheetDeployments"
+        
+        $jobQuery = @(
+            "USE msdb;",
+            "IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'$jobName')",
+            "BEGIN",
+            "    EXEC dbo.sp_delete_job @job_name = N'$jobName', @delete_unused_schedule = 1;",
+            "END;",
+            "EXEC dbo.sp_add_job @job_name = N'$jobName', @enabled = 1, @description = N'Automated timesheet ETL background loop configuration.', @category_name = N'[Uncategorized (Local)]', @owner_login_name = N'sa';",
+            "EXEC msdb.dbo.sp_add_jobstep @job_name = N'$jobName', @step_name = N'Execute_SSIS_Timesheet_Package', @step_id = 1, @cmdexec_success_code = 0, @on_success_action = 1, @on_fail_action = 2, @subsystem = N'SSIS', @command = N'/ISSERVER `"`"\SSISDB\$folderName\TimesheetMigration\Package.dtsx`"`" /SERVER `"`".`"`"', @database_name = N'master';",
+            "EXEC dbo.sp_add_jobschedule @job_name = N'$jobName', @name = N'${jobName}_Interval_Schedule', @enabled = 1, @freq_type = 8, @freq_interval = 62, @freq_subday_type = 4, @freq_subday_interval = 1, @freq_recurrence_factor = 1, @active_start_time = 080000, @active_end_time = 170000;",
+            "EXEC dbo.sp_add_jobserver @job_name = N'$jobName', @server_name = N'(local)';"
+        ) -join "`n"
+        
+        $batches = [regex]::Split($jobQuery, "^\s*GO\s*$", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline)
+        foreach ($batch in $batches) {
+            $trimmedBatch = $batch.Trim()
+            if ($trimmedBatch.Length -gt 0) {
+                $command = $connection.CreateCommand()
+                $command.CommandText = $trimmedBatch
+                $command.ExecuteNonQuery() | Out-Null
+            }
+        }
+        Write-Host "SUCCESS: SQL Agent Job configured successfully: $jobName"
+        $connection.Close()
+
+    # NOTIFY SUCCESS
+    - name: Notify Success
+      if: success()
+      shell: powershell
+      run: |
+        $timestamp = Get-Date -Format "yyyy-MM-dd"
+
+        $text = "SSIS DEPLOYMENT - SUCCESS`n`nCreator: ${{ github.actor }}`n`nEnvironment: production`n`nDate: $timestamp`n`nDeployment completed successfully."
+
+        $payload = @{ text = $text } | ConvertTo-Json -Depth 1
+
+        Invoke-RestMethod `
+          -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+          -Method Post `
+          -Body $payload `
+          -ContentType "application/json"
+
+    # NOTIFY FAILURE
+    - name: Notify Failure
+      if: failure()
+      shell: powershell
+      run: |
+        $timestamp = Get-Date -Format "yyyy-MM-dd"
+
+        $text = "SSIS DEPLOYMENT - FAILED`n`nCreator: ${{ github.actor }}`n`nEnvironment: production`n`nDate: $timestamp`n`nDeployment failed. Please review logs."
+
+        $payload = @{ text = $text } | ConvertTo-Json -Depth 1
+
+        Invoke-RestMethod `
+          -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" `
+          -Method Post `
+          -Body $payload `
+          -ContentType "application/json"

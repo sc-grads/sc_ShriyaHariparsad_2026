@@ -9,13 +9,12 @@ on:
  
 jobs:
   
-  # JOB 1: Deploy to SAMBE2025001 
+  # JOB 1: Deploy to SAMBE2025001 via Pinggy Tunnel
   
   deploy-sambe:
     name: deploy-Shriya / deploy
     runs-on: windows-latest
     
-    # Points to your existing production environment secrets
     environment:
       name: production
  
@@ -32,7 +31,7 @@ jobs:
       run: |
         $timestamp = Get-Date -Format "yyyy-MM-dd"
 
-        $text = "SSIS DEPLOYMENT - STARTED`n`nCreator: ${{ github.actor }}`n`nEnvironment: production`n`nDate: $timestamp`n`nDeployment has started."
+        $text = "SSIS DEPLOYMENT - STARTED`n`nCreator: ${{ github.actor }}`n`nEnvironment: production (Pinggy)`n`nDate: $timestamp`n`nDeployment has started."
 
         $payload = @{ text = $text } | ConvertTo-Json -Depth 1
 
@@ -74,7 +73,7 @@ jobs:
             Throw "Build completed, but the compiled .ispac artifact was not found inside the target bin path."
         }
  
-    # DEPLOYMENT TO SSISDB CATALOG
+    # DEPLOYMENT TO SSISDB CATALOG VIA LOCAL AGENT STAGING STACK
     - name: Deploy Package to SSISDB Catalog
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
@@ -82,44 +81,52 @@ jobs:
         $projectPath = "${{ env.ISPAC_PATH }}"
         $projectName = [System.IO.Path]::GetFileNameWithoutExtension($projectPath)
         
-        Write-Host "Reading $projectName binary package data..."
+        Write-Host "Staging $projectName binary package payload stream over Pinggy tunnel..."
         $fileBytes = [System.IO.File]::ReadAllBytes($projectPath)
         $hexString = "0x" + [System.BitConverter]::ToString($fileBytes).Replace("-", "")
         
-        $connStr = "Data Source=${{ secrets.PROJECT_URL }};Initial Catalog=master;User Id=${{ secrets.USER_NAME }};Password=${{ secrets.PASSWORD_SQL }};TrustServerCertificate=True;Encrypt=False;"
-        $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
-        $connection.Open()
-        
         $folderName = "TimesheetDeployments"
         
-        $sqlQuery = @(
+        # Added a self-deletion drop script block at the end of @runCommand 
+        $sqlScript = @(
+            "USE master;",
             "SET NOCOUNT ON;",
-            "IF NOT EXISTS (SELECT 1 FROM [SSISDB].[catalog].[folders] WHERE name = '$folderName')",
+            "IF OBJECT_ID('master.dbo.SSIS_Deploy_Staging', 'U') IS NOT NULL DROP TABLE master.dbo.SSIS_Deploy_Staging;",
+            "CREATE TABLE master.dbo.SSIS_Deploy_Staging (Folder VARCHAR(100), Project VARCHAR(100), Bin VARBINARY(MAX));",
+            "INSERT INTO master.dbo.SSIS_Deploy_Staging VALUES ('$folderName', '$projectName', $hexString);",
+            "USE msdb;",
+            "IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'Temp_SSIS_Local_Proxy_Deploy')",
             "BEGIN",
-            "    EXEC [SSISDB].[catalog].[create_folder] @folder_name = '$folderName';",
-            "END",
-            "DECLARE @project_binary VARBINARY(MAX) = $hexString;",
-            "EXEC [SSISDB].[catalog].[deploy_project]",
-            "    @folder_name = '$folderName',",
-            "    @project_name = '$projectName',",
-            "    @project_stream = @project_binary;"
+            "    EXEC dbo.sp_delete_job @job_name = N'Temp_SSIS_Local_Proxy_Deploy', @delete_unused_schedule = 1;",
+            "END;",
+            "EXEC dbo.sp_add_job @job_name = N'Temp_SSIS_Local_Proxy_Deploy', @enabled = 1, @owner_login_name = N'sa';",
+            "DECLARE @runCommand NVARCHAR(MAX);",
+            "SET @runCommand = N'SET NOCOUNT ON; DECLARE @f VARCHAR(100), @p VARCHAR(100), @b VARBINARY(MAX); SELECT @f = Folder, @p = Project, @b = Bin FROM master.dbo.SSIS_Deploy_Staging; IF NOT EXISTS (SELECT 1 FROM [SSISDB].[catalog].[folders] WHERE name = @f) BEGIN EXEC [SSISDB].[catalog].[create_folder] @folder_name = @f; END; EXEC [SSISDB].[catalog].[deploy_project] @folder_name = @f, @project_name = @p, @project_stream = @b; DROP TABLE master.dbo.SSIS_Deploy_Staging; EXEC msdb.dbo.sp_delete_job @job_name = N''Temp_SSIS_Local_Proxy_Deploy'', @delete_unused_schedule = 1;';",
+            "EXEC dbo.sp_add_jobstep @job_name = N'Temp_SSIS_Local_Proxy_Deploy', @step_name = N'ExecuteLocalWindowsAuthContext', @step_id = 1, @subsystem = N'TSQL', @command = @runCommand, @database_name = N'master';",
+            "EXEC dbo.sp_add_jobserver @job_name = N'Temp_SSIS_Local_Proxy_Deploy', @server_name = N'(local)';",
+            "EXEC dbo.sp_start_job @job_name = N'Temp_SSIS_Local_Proxy_Deploy';"
         ) -join "`n"
-
-        $command = $connection.CreateCommand()
-        $command.CommandText = $sqlQuery
-        $command.ExecuteNonQuery() | Out-Null
-        Write-Host "SUCCESS: Project deployed to SSISDB folder: $folderName"
-        $connection.Close()
+        
+        $scriptPath = "${{ github.workspace }}\deploy_ssis_tunnel.sql"
+        Set-Content -Path $scriptPath -Value $sqlScript
+        
+        sqlcmd `
+          -S "${{ secrets.PROJECT_URL }}" `
+          -d "master" `
+          -U "${{ secrets.USER_NAME }}" `
+          -P "${{ secrets.PASSWORD_SQL }}" `
+          -C `
+          -b `
+          -i "$scriptPath"
+          
+        Start-Sleep -Seconds 7
+        Write-Host "SUCCESS: Project routed via local Windows Authentication Context successfully."
 
     # CREATE AGENT JOB & SCHEDULE (8AM-5PM MON-FRI)
     - name: Configure SQL Agent Automated Scheduling Engine Job
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
-        $connStr = "Data Source=${{ secrets.PROJECT_URL }};Initial Catalog=master;User Id=${{ secrets.USER_NAME }};Password=${{ secrets.PASSWORD_SQL }};TrustServerCertificate=True;Encrypt=False;"
-        $connection = New-Object System.Data.SqlClient.SqlConnection($connStr)
-        $connection.Open()
-        
         $jobName = "Run_Timesheet_ETL_Job"
         $folderName = "TimesheetDeployments"
         
@@ -135,17 +142,19 @@ jobs:
             "EXEC dbo.sp_add_jobserver @job_name = N'$jobName', @server_name = N'(local)';"
         ) -join "`n"
         
-        $batches = [regex]::Split($jobQuery, "^\s*GO\s*$", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline)
-        foreach ($batch in $batches) {
-            $trimmedBatch = $batch.Trim()
-            if ($trimmedBatch.Length -gt 0) {
-                $command = $connection.CreateCommand()
-                $command.CommandText = $trimmedBatch
-                $command.ExecuteNonQuery() | Out-Null
-            }
-        }
+        $jobScriptPath = "${{ github.workspace }}\configure_agent.sql"
+        Set-Content -Path $jobScriptPath -Value $jobQuery
+        
+        sqlcmd `
+          -S "${{ secrets.PROJECT_URL }}" `
+          -d "master" `
+          -U "${{ secrets.USER_NAME }}" `
+          -P "${{ secrets.PASSWORD_SQL }}" `
+          -C `
+          -b `
+          -i "$jobScriptPath"
+          
         Write-Host "SUCCESS: SQL Agent Job configured successfully: $jobName"
-        $connection.Close()
 
     # NOTIFY SUCCESS
     - name: Notify Success

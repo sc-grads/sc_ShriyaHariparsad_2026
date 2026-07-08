@@ -1,4 +1,4 @@
-name: Automation SSIS
+name: Automation SSIS DEPLOY
  
 on:
   push:

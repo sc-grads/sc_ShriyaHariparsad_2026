@@ -9,7 +9,7 @@ on:
  
 jobs:
   
-  # JOB 1: Deploy to SAMBE2025001 via Pinggy Tunnel
+  # JOB 1: Deploy to Shriya via Pinggy Tunnel
   
   deploy-sambe:
     name: deploy-Shriya / deploy
@@ -73,7 +73,7 @@ jobs:
             Throw "Build completed, but the compiled .ispac artifact was not found inside the target bin path."
         }
  
-    # DEPLOYMENT TO SSISDB CATALOG VIA LOCAL AGENT STAGING STACK
+    # DEPLOYMENT TO SSISDB CATALOG 
     - name: Deploy Package to SSISDB Catalog
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
@@ -121,7 +121,7 @@ jobs:
         Start-Sleep -Seconds 7
         Write-Host "SUCCESS: Project routed via local Windows Authentication Context successfully."
 
-    # CREATE AGENT JOB & SCHEDULE (8AM-5PM MON-FRI)
+    # CREATE AGENT JOB & SCHEDULE 
     - name: Configure SQL Agent Automated Scheduling Engine Job
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
@@ -192,14 +192,14 @@ jobs:
           -ContentType "application/json"
 
 
-  # JOB 2: Deploy to Buhle-runner (Enforces Manual Review Prompt)
+  # JOB 2: Deploy to Buhle
   
   deploy-buhle:
     name: deploy-Buhle / deploy
     runs-on: windows-latest
     needs: deploy-sambe 
     
-    # Points cleanly to your exact environment profile name 
+    
     environment:
       name: Buhle
 
@@ -247,7 +247,7 @@ jobs:
             Throw "Build completed, but the compiled .ispac artifact was not found."
         }
  
-    # DEPLOYMENT TO BUHLE'S SSISDB CATALOG VIA LOCAL PROXY WORKAROUND
+    # DEPLOYMENT TO BUHLE'S SSISDB CATALOG 
     - name: Deploy Package to SSISDB Catalog
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell

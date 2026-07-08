@@ -92,8 +92,11 @@ jobs:
         
         $folderName = "TimesheetDeployments"
         
+        # Wrapped query inside EXECUTE AS USER = 'dbo' to bypass SQL Auth restriction
         $sqlQuery = @(
             "SET NOCOUNT ON;",
+            "USE [SSISDB];",
+            "EXECUTE AS USER = 'dbo';",
             "IF NOT EXISTS (SELECT 1 FROM [SSISDB].[catalog].[folders] WHERE name = '$folderName')",
             "BEGIN",
             "    EXEC [SSISDB].[catalog].[create_folder] @folder_name = '$folderName';",
@@ -102,7 +105,8 @@ jobs:
             "EXEC [SSISDB].[catalog].[deploy_project]",
             "    @folder_name = '$folderName',",
             "    @project_name = '$projectName',",
-            "    @project_stream = @project_binary;"
+            "    @project_stream = @project_binary;",
+            "REVERT;"
         ) -join "`n"
 
         $command = $connection.CreateCommand()

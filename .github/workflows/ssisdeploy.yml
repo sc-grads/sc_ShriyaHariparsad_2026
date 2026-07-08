@@ -13,7 +13,7 @@ jobs:
   
   deploy-sambe:
     name: deploy-Shriya / deploy
-    runs-on: piingy
+    runs-on: windows-latest
     
     # Points to your existing production environment secrets
     environment:

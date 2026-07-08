@@ -27,6 +27,7 @@ jobs:
 
     # NOTIFY DEPLOYMENT STARTED
     - name: Notify Deployment Started
+      continue-on-error: true
       shell: powershell
       run: |
         $timestamp = Get-Date -Format "yyyy-MM-dd"
@@ -56,7 +57,7 @@ jobs:
             Write-Host "Found Visual Studio compiler at: $devenvCom"
             echo "DEVENV_PATH=$devenvCom" | Out-File -FilePath $env:GITHUB_ENV -Append
         } else {
-            Throw "CRITICAL ERROR: Visual Studio (devenv.com) was not found on this self-hosted runner."
+            Throw "CRITICAL ERROR: Visual Studio (devenv.com) was not found on this runner."
         }
  
     - name: Build SSIS Project to ISPAC
@@ -149,6 +150,7 @@ jobs:
     # NOTIFY SUCCESS
     - name: Notify Success
       if: success()
+      continue-on-error: true
       shell: powershell
       run: |
         $timestamp = Get-Date -Format "yyyy-MM-dd"
@@ -166,6 +168,7 @@ jobs:
     # NOTIFY FAILURE
     - name: Notify Failure
       if: failure()
+      continue-on-error: true
       shell: powershell
       run: |
         $timestamp = Get-Date -Format "yyyy-MM-dd"

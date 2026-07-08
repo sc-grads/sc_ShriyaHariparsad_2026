@@ -1,4 +1,4 @@
-name: Automation SSIS DEPLOY
+name: Automation SSIS
  
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
       run: |
         $timestamp = Get-Date -Format "yyyy-MM-dd"
 
-        $text = "SSIS DEPLOYMENT - STARTED`n`nCreator: ${{ github.actor }}`n`nEnvironment: production (Pinggy)`n`nDate: $timestamp`n`nDeployment has started."
+        $text = "SSIS DEPLOYMENT (SHRIYA) - STARTED`n`nCreator: ${{ github.actor }}`n`nEnvironment: production (Pinggy)`n`nDate: $timestamp`n`nDeployment has started."
 
         $payload = @{ text = $text } | ConvertTo-Json -Depth 1
 
@@ -87,7 +87,6 @@ jobs:
         
         $folderName = "TimesheetDeployments"
         
-        # Added a self-deletion drop script block at the end of @runCommand 
         $sqlScript = @(
             "USE master;",
             "SET NOCOUNT ON;",
@@ -164,7 +163,7 @@ jobs:
       run: |
         $timestamp = Get-Date -Format "yyyy-MM-dd"
 
-        $text = "SSIS DEPLOYMENT - SUCCESS`n`nCreator: ${{ github.actor }}`n`nEnvironment: production`n`nDate: $timestamp`n`nDeployment completed successfully."
+        $text = "SSIS DEPLOYMENT (SHRIYA) - SUCCESS`n`nCreator: ${{ github.actor }}`n`nEnvironment: production`n`nDate: $timestamp`n`nDeployment completed successfully."
 
         $payload = @{ text = $text } | ConvertTo-Json -Depth 1
 
@@ -182,7 +181,7 @@ jobs:
       run: |
         $timestamp = Get-Date -Format "yyyy-MM-dd"
 
-        $text = "SSIS DEPLOYMENT - FAILED`n`nCreator: ${{ github.actor }}`n`nEnvironment: production`n`nDate: $timestamp`n`nDeployment failed. Please review logs."
+        $text = "SSIS DEPLOYMENT (SHRIYA) - FAILED`n`nCreator: ${{ github.actor }}`n`nEnvironment: production`n`nDate: $timestamp`n`nDeployment failed. Please review logs."
 
         $payload = @{ text = $text } | ConvertTo-Json -Depth 1
 
@@ -191,3 +190,163 @@ jobs:
           -Method Post `
           -Body $payload `
           -ContentType "application/json"
+
+
+  # JOB 2: Deploy to Buhle-runner (Enforces Manual Review Prompt)
+  
+  deploy-buhle:
+    name: deploy-Buhle / deploy
+    runs-on: windows-latest
+    needs: deploy-sambe 
+    
+    # Points cleanly to your exact environment profile name 
+    environment:
+      name: Buhle
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: false  
+
+    # NOTIFY BUHLE DEPLOYMENT STARTED
+    - name: Notify Buhle Deployment Started
+      continue-on-error: true
+      shell: powershell
+      run: |
+        $timestamp = Get-Date -Format "yyyy-MM-dd"
+        $text = "SSIS DEPLOYMENT (BUHLE) - STARTED`n`nApproved By: ${{ github.actor }}`n`nEnvironment: Buhle`n`nDate: $timestamp`n`nDeployment to Buhle's instance has started."
+        $payload = @{ text = $text } | ConvertTo-Json -Depth 1
+        Invoke-RestMethod -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" -Method Post -Body $payload -ContentType "application/json"
+
+    # CONTINUOUS INTEGRATION 
+    - name: Locate Visual Studio DevEnv Tool
+      shell: powershell
+      run: |
+        $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property productPath
+        if (-not $vsPath) { $vsPath = & "${env:ProgramFiles}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property productPath }
+        $devenvDir = Split-Path $vsPath
+        $devenvCom = Join-Path $devenvDir "devenv.com"
+        if (Test-Path $devenvCom) {
+            Write-Host "Found Visual Studio compiler at: $devenvCom"
+            echo "DEVENV_PATH=$devenvCom" | Out-File -FilePath $env:GITHUB_ENV -Append
+        } else {
+            Throw "CRITICAL ERROR: Visual Studio (devenv.com) was not found."
+        }
+ 
+    - name: Build SSIS Project to ISPAC
+      shell: powershell
+      run: |
+        $dtprojPath = "${{ github.workspace }}\Timesheet_Project\TimesheetMigration\TimesheetMigration\TimesheetMigration.dtproj"
+        & "${{ env.DEVENV_PATH }}" "$dtprojPath" /Build "Development"
+        $targetIspacPath = "${{ github.workspace }}\Timesheet_Project\TimesheetMigration\TimesheetMigration\bin\Development\TimesheetMigration.ispac"
+        if (Test-Path $targetIspacPath) {
+            Write-Host "Success: .ispac deployment bundle created cleanly."
+            echo "ISPAC_PATH=$targetIspacPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+        } else {
+            Throw "Build completed, but the compiled .ispac artifact was not found."
+        }
+ 
+    # DEPLOYMENT TO BUHLE'S SSISDB CATALOG VIA LOCAL PROXY WORKAROUND
+    - name: Deploy Package to SSISDB Catalog
+      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      shell: powershell
+      run: |
+        $projectPath = "${{ env.ISPAC_PATH }}"
+        $projectName = [System.IO.Path]::GetFileNameWithoutExtension($projectPath)
+        
+        Write-Host "Staging $projectName binary package payload stream to Buhle's environment..."
+        $fileBytes = [System.IO.File]::ReadAllBytes($projectPath)
+        $hexString = "0x" + [System.BitConverter]::ToString($fileBytes).Replace("-", "")
+        
+        $folderName = "TimesheetDeployments"
+        
+        $sqlScript = @(
+            "USE master;",
+            "SET NOCOUNT ON;",
+            "IF OBJECT_ID('master.dbo.SSIS_Deploy_Staging', 'U') IS NOT NULL DROP TABLE master.dbo.SSIS_Deploy_Staging;",
+            "CREATE TABLE master.dbo.SSIS_Deploy_Staging (Folder VARCHAR(100), Project VARCHAR(100), Bin VARBINARY(MAX));",
+            "INSERT INTO master.dbo.SSIS_Deploy_Staging VALUES ('$folderName', '$projectName', $hexString);",
+            "USE msdb;",
+            "IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'Temp_SSIS_Local_Proxy_Deploy')",
+            "BEGIN",
+            "    EXEC dbo.sp_delete_job @job_name = N'Temp_SSIS_Local_Proxy_Deploy', @delete_unused_schedule = 1;",
+            "END;",
+            "EXEC dbo.sp_add_job @job_name = N'Temp_SSIS_Local_Proxy_Deploy', @enabled = 1, @owner_login_name = N'sa';",
+            "DECLARE @runCommand NVARCHAR(MAX);",
+            "SET @runCommand = N'SET NOCOUNT ON; DECLARE @f VARCHAR(100), @p VARCHAR(100), @b VARBINARY(MAX); SELECT @f = Folder, @p = Project, @b = Bin FROM master.dbo.SSIS_Deploy_Staging; IF NOT EXISTS (SELECT 1 FROM [SSISDB].[catalog].[folders] WHERE name = @f) BEGIN EXEC [SSISDB].[catalog].[create_folder] @folder_name = @f; END; EXEC [SSISDB].[catalog].[deploy_project] @folder_name = @f, @project_name = @p, @project_stream = @b; DROP TABLE master.dbo.SSIS_Deploy_Staging; EXEC msdb.dbo.sp_delete_job @job_name = N''Temp_SSIS_Local_Proxy_Deploy'', @delete_unused_schedule = 1;';",
+            "EXEC dbo.sp_add_jobstep @job_name = N'Temp_SSIS_Local_Proxy_Deploy', @step_name = N'ExecuteLocalWindowsAuthContext', @step_id = 1, @subsystem = N'TSQL', @command = @runCommand, @database_name = N'master';",
+            "EXEC dbo.sp_add_jobserver @job_name = N'Temp_SSIS_Local_Proxy_Deploy', @server_name = N'(local)';",
+            "EXEC dbo.sp_start_job @job_name = N'Temp_SSIS_Local_Proxy_Deploy';"
+        ) -join "`n"
+        
+        $scriptPath = "${{ github.workspace }}\deploy_ssis_buhle.sql"
+        Set-Content -Path $scriptPath -Value $sqlScript
+        
+        sqlcmd `
+          -S "${{ secrets.PROJECT_URL }}" `
+          -d "master" `
+          -U "${{ secrets.USER_NAME }}" `
+          -P "${{ secrets.PASSWORD_SQL }}" `
+          -C `
+          -b `
+          -i "$scriptPath"
+          
+        Start-Sleep -Seconds 7
+        Write-Host "SUCCESS: Project routed via local Windows Authentication Context successfully."
+
+    # CONFIGURE BUHLE'S SCHEDULED SQL AGENT JOB
+    - name: Configure SQL Agent Automated Scheduling Engine Job
+      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      shell: powershell
+      run: |
+        $jobName = "Run_Timesheet_ETL_Job"
+        $folderName = "TimesheetDeployments"
+        
+        $jobQuery = @(
+            "USE msdb;",
+            "IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'$jobName')",
+            "BEGIN",
+            "    EXEC dbo.sp_delete_job @job_name = N'$jobName', @delete_unused_schedule = 1;",
+            "END;",
+            "EXEC dbo.sp_add_job @job_name = N'$jobName', @enabled = 1, @description = N'Automated timesheet ETL background loop configuration.', @category_name = N'[Uncategorized (Local)]', @owner_login_name = N'sa';",
+            "EXEC msdb.dbo.sp_add_jobstep @job_name = N'$jobName', @step_name = N'Execute_SSIS_Timesheet_Package', @step_id = 1, @cmdexec_success_code = 0, @on_success_action = 1, @on_fail_action = 2, @subsystem = N'SSIS', @command = N'/ISSERVER `"`"\SSISDB\$folderName\TimesheetMigration\Package.dtsx`"`" /SERVER `"`".`"`"', @database_name = N'master';",
+            "EXEC dbo.sp_add_jobschedule @job_name = N'$jobName', @name = N'${jobName}_Interval_Schedule', @enabled = 1, @freq_type = 8, @freq_interval = 62, @freq_subday_type = 4, @freq_subday_interval = 1, @freq_recurrence_factor = 1, @active_start_time = 080000, @active_end_time = 170000;",
+            "EXEC dbo.sp_add_jobserver @job_name = N'$jobName', @server_name = N'(local)';"
+        ) -join "`n"
+        
+        $jobScriptPath = "${{ github.workspace }}\configure_agent_buhle.sql"
+        Set-Content -Path $jobScriptPath -Value $jobQuery
+        
+        sqlcmd `
+          -S "${{ secrets.PROJECT_URL }}" `
+          -d "master" `
+          -U "${{ secrets.USER_NAME }}" `
+          -P "${{ secrets.PASSWORD_SQL }}" `
+          -C `
+          -b `
+          -i "$jobScriptPath"
+          
+        Write-Host "SUCCESS: SQL Agent Job configured successfully on Buhle's instance: $jobName"
+
+    # NOTIFY SUCCESS FOR BUHLE
+    - name: Notify Buhle Success
+      if: success()
+      continue-on-error: true
+      shell: powershell
+      run: |
+        $timestamp = Get-Date -Format "yyyy-MM-dd"
+        $text = "SSIS DEPLOYMENT (BUHLE) - SUCCESS`n`nEnvironment: Buhle`n`nDate: $timestamp`n`nDeployment completed successfully."
+        $payload = @{ text = $text } | ConvertTo-Json -Depth 1
+        Invoke-RestMethod -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" -Method Post -Body $payload -ContentType "application/json"
+
+    # NOTIFY FAILURE FOR BUHLE
+    - name: Notify Buhle Failure
+      if: failure()
+      continue-on-error: true
+      shell: powershell
+      run: |
+        $timestamp = Get-Date -Format "yyyy-MM-dd"
+        $text = "SSIS DEPLOYMENT (BUHLE) - FAILED`n`nEnvironment: Buhle`n`nDate: $timestamp`n`nDeployment failed. Please review logs."
+        $payload = @{ text = $text } | ConvertTo-Json -Depth 1
+        Invoke-RestMethod -Uri "${{ secrets.TEAMS_WEBHOOK_URL }}" -Method Post -Body $payload -ContentType "application/json"

@@ -12,7 +12,7 @@ jobs:
   # JOB 1: Deploy to Shriya via Pinggy Tunnel
   
   deploy-sambe:
-    name: deploy-Shriya / deploy
+    name: DevTest/Deploy
     runs-on: windows-latest
     
     environment:
@@ -85,7 +85,7 @@ jobs:
         $fileBytes = [System.IO.File]::ReadAllBytes($projectPath)
         $hexString = "0x" + [System.BitConverter]::ToString($fileBytes).Replace("-", "")
         
-        $folderName = "TimesheetDeployments"
+        $folderName = "TimesheetDevTestMigration"
         
         $sqlScript = @(
             "USE master;",
@@ -126,8 +126,8 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
-        $jobName = "Run_Timesheet_ETL_Job"
-        $folderName = "TimesheetDeployments"
+        $jobName = "RunTimesheetDevTestMigrationPK"
+        $folderName = "TimesheetDevTestMigration"
         
         $jobQuery = @(
             "USE msdb;",
@@ -195,7 +195,7 @@ jobs:
   # JOB 2: Deploy to Buhle
   
   deploy-buhle:
-    name: deploy-Buhle / deploy
+    name: Production/Deploy
     runs-on: windows-latest
     needs: deploy-sambe 
     
@@ -259,7 +259,7 @@ jobs:
         $fileBytes = [System.IO.File]::ReadAllBytes($projectPath)
         $hexString = "0x" + [System.BitConverter]::ToString($fileBytes).Replace("-", "")
         
-        $folderName = "TimesheetDeployments"
+        $folderName = "TimesheetProductionMigration"
         
         $sqlScript = @(
             "USE master;",
@@ -300,8 +300,8 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       shell: powershell
       run: |
-        $jobName = "Run_Timesheet_ETL_Job"
-        $folderName = "TimesheetDeployments"
+        $jobName = "RunTimesheetProductionMigrationPK"
+        $folderName = "TimesheetProductionMigration"
         
         $jobQuery = @(
             "USE msdb;",

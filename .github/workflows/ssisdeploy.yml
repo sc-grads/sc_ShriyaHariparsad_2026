@@ -1,4 +1,4 @@
-name: Automation SSIS DEPLOY
+name: Timesheet Automation
  
 on:
   push:

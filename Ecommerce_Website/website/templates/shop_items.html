@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %} Shop Items {% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    
+    <!-- HEADER BAR: TITLE + ALL CONTROLS GROUPED ON ONE LEVEL -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; width: 100%;">
+        
+        <h2 style="color: #1e293b; font-weight: 800; font-size: 28px; margin: 0;">Product Inventory</h2>
+        
+        <!-- FLEX CONTAINER HOUSING BOTH THE FORM AND THE BUTTON ON THE SAME AXIS -->
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            
+            <form method="GET" action="/shop-items" id="filterForm" style="margin: 0; display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;">
+                
+                <!-- CATEGORY FILTER SELECTOR -->
+                <select name="category" class="form-select fw-bold shadow-sm" style="background-color: #ffffff; border: 1px solid #fbcfe8; color: #db2777; border-radius: 6px; padding: 8px 36px 8px 16px; cursor: pointer; font-size: 14px; min-width: 190px; font-family: sans-serif; font-weight: 700; height: 40px; box-sizing: border-box;" onchange="document.getElementById('filterForm').submit()">
+                    <option value="" style="color: #2d3748;">All Categories</option>
+                    <option value="Phones & Tablets" {% if selected_category == 'Phones & Tablets' %}selected{% endif %} style="color: #2d3748;">Phones & Tablets</option>
+                    <option value="Gaming & Consoles" {% if selected_category == 'Gaming & Consoles' %}selected{% endif %} style="color: #2d3748;">Gaming & Consoles</option>
+                    <option value="Smart Home & Security" {% if selected_category == 'Smart Home & Security' %}selected{% endif %} style="color: #2d3748;">Smart Home & Security</option>
+                    <option value="Laptops & Computers" {% if selected_category == 'Laptops & Computers' %}selected{% endif %} style="color: #2d3748;">Laptops & Computers</option>
+    <option value="Audio & Headphones" {% if selected_category == 'Audio & Headphones' %}selected{% endif %} style="color: #2d3748;">Audio & Headphones</option>
+    <option value="TV & Home Theater" {% if selected_category == 'TV & Home Theater' %}selected{% endif %} style="color: #2d3748;">TV & Home Theater</option>
+    <option value="Accessories & Power" {% if selected_category == 'Accessories & Power' %}selected{% endif %} style="color: #2d3748;">Accessories & Power</option>
+                </select>
+
+                <!-- FIXED CALENDAR DATE RANGE CONTROLS -->
+                <div style="display: flex; align-items: center; gap: 4px; background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 6px; padding: 0 10px; height: 40px; box-shadow: 0 2px 4px rgba(219,39,119,0.02); box-sizing: border-box;">
+                    <input type="date" name="start_date" value="{{ start_date }}" class="form-control border-0 p-0" style="color: #db2777; font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; box-shadow: none; width: 130px; height: 100%;" onchange="document.getElementById('filterForm').submit()">
+                    <span style="color: #db2777; font-weight: 800; font-size: 13px; padding: 0 4px;">to</span>
+                    <input type="date" name="end_date" value="{{ end_date }}" class="form-control border-0 p-0" style="color: #db2777; font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; box-shadow: none; width: 130px; height: 100%;" onchange="document.getElementById('filterForm').submit()">
+                    {% if start_date or end_date %}
+                        <a href="/shop-items?category={{ selected_category }}" style="color: #64748b; text-decoration: none; font-size: 16px; padding-left: 6px; font-weight: bold; display: inline-block;">✕</a>
+                    {% endif %}
+                </div>
+
+            </form>
+
+                        <!-- BTN SITS INSIDE THE RIGHT ALIGNED FLEX TRACK WITH PINK THEME -->
+            <a href="/add-shop-items" class="btn fw-bold text-white d-inline-flex align-items-center justify-content-center shadow-none" style="background-color: #db2777 !important; border: 1px solid #db2777 !important; border-radius: 6px; outline: none !important; box-shadow: none !important; height: 40px; padding: 0 24px; white-space: nowrap; text-decoration: none; font-family: sans-serif; font-size: 14px; font-weight: 700;">
+                Add New Product
+            </a>
+
+
+
+        </div>
+    </div>
+
+    
+
+
+    
+
+
+    {% if items | length < 1 %}
+    <div class="text-center py-5 shadow" style="background-color: #ffffff; border-radius: 12px;">
+        <i class="fa-solid fa-box-open mb-3" style="font-size: 50px; color: #ced4da;"></i>
+        <h4 class="fw-bold" style="color: #333333;">No Shop Items Available</h4>
+        <p class="text-muted mb-0">Your store database is currently empty or no items match your selection rule criteria.</p>
+    </div>
+{% else %}
+    <div class="card border-0 shadow" style="border-radius: 12px; overflow: hidden;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="background-color: #ffffff;">
+                <thead style="background-color: #f8f9fa; border-bottom: 2px solid #edf2f7;">
+                    <tr class="text-center" style="color: #000000; font-weight: 800;">
+                        <th scope="col" class="text-center" style="color: #000000; font-weight: 800; padding: 12px;">ID</th>
+                        <th scope="col" class="text-center" style="color: #000000; font-weight: 800; padding: 12px;">Product Info</th>
+                        <th scope="col" class="text-center" style="color: #000000; font-weight: 800; padding: 12px;">Category</th>
+                        <th scope="col" class="text-center" style="color: #000000; font-weight: 800; padding: 12px;">Date Added</th>
+                        <th scope="col" class="text-center" style="color: #000000; font-weight: 800; padding: 12px;">Previous Price</th>
+                        <th scope="col" class="text-center" style="color: #000000; font-weight: 800; padding: 12px;">Current Price</th>
+                        <th scope="col" class="text-center" style="color: #000000; font-weight: 800; padding: 12px;">Stock Level</th>
+                        <th scope="col" class="text-center" style="color: #000000; font-weight: 800; padding: 12px;">Flash Sale</th>
+                        <th scope="col" class="text-center" style="color: #000000; font-weight: 800; padding: 12px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr style="border-bottom: 1px solid #edf2f7;">
+                        <th scope="row" class="text-center fw-bold" style="color: #6c757d;">#{{ item.id }}</th>
+                        <td>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <img src="{{ item.product_picture }}" alt="{{ item.product_name }}" class="shadow-sm border" style="height: 48px; width: 48px; border-radius: 6px; object-fit: cover; margin-right: 12px;">
+                                <span class="fw-bold text-dark" style="font-size: 15px;">{{ item.product_name }}</span>
+                            </div>
+                        </td>
+                        <td class="text-center" style="color: #495057; font-size: 14px; font-weight: 500;">
+                            <span class="badge bg-light text-dark border px-2 py-1">{{ item.category }}</span>
+                        </td>
+                        <td class="text-center" style="color: #495057; font-size: 14px;">{{ item.date_added.strftime('%Y-%m-%d') if item.date_added else 'N/A' }}</td>
+                        
+                        <td class="text-center" style="color: #dc3545; text-decoration: line-through; font-size: 14px;">
+                            {% if item.previous_price %}
+                            R {{ "%.2f"|format(item.previous_price) }}
+                            {% else %}
+                            --
+                            {% endif %}
+                        </td>
+                        
+                        <td class="text-center fw-bold" style="color: #198754; font-size: 15px;">R {{ "%.2f"|format(item.current_price) }}</td>
+                        <td class="text-center">
+                            {% if item.in_stock < 1 %}
+                            <span class="badge bg-danger px-2.5 py-1.5" style="border-radius: 4px; font-size: 12px;">Out of Stock</span>
+                            {% elif item.in_stock <= 5 %}
+                            <span class="badge bg-warning text-dark px-2.5 py-1.5" style="border-radius: 4px; font-size: 12px;">Low Stock ({{ item.in_stock }})</span>
+                            {% else %}
+                            <span class="badge bg-success px-2.5 py-1.5" style="border-radius: 4px; font-size: 12px;">{{ item.in_stock }} Available</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if item.flash_sale %}
+                            <span class="badge bg-primary px-2.5 py-1.5" style="border-radius: 4px; font-size: 12px;">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary px-2.5 py-1.5" style="border-radius: 4px; font-size: 12px;">No</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="/update-item/{{ item.id }}" class="btn btn-sm" style="border-radius: 4px; font-weight: 500; font-size: 13px; padding: 6px 12px; border: none; box-shadow: none; color: inherit; background: none; text-decoration: none;">
+                                    Update
+                                </a>
+                                <button type="button" class="btn btn-sm text-danger border-0 p-0" 
+                                        style="background: none; font-weight: 500; font-size: 13px; padding: 6px 12px; box-shadow: none;"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteProductModal" 
+                                        data-id="{{ item.id }}" 
+                                        data-name="{{ item.product_name }}">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if items_pagination and items_pagination.pages > 1 %}
+    <div class="d-flex justify-content-center align-items-center mt-4 gap-2 mb-2" style="font-family: sans-serif;">
+        
+        {% if items_pagination.has_prev %}
+            <a href="{{ url_for('admin.shop_items', page=items_pagination.prev_num, category=selected_category, start_date=start_date, end_date=end_date) }}" class="btn fw-bold shadow-none d-flex align-items-center justify-content-center" style="background-color: #db2777 !important; border: 1px solid #db2777 !important; color: #ffffff !important; height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: 700;">Previous</a>
+        {% else %}
+            <button class="btn fw-bold d-flex align-items-center justify-content-center" disabled style="background-color: #f1f5f9 !important; border: 1px solid #cbd5e1 !important; color: #94a3b8 !important; height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: not-allowed;">Previous</button>
+        {% endif %}
+
+        <div class="px-3 py-1 bg-white border fw-bold shadow-sm" style="border-color: #fbcfe8 !important; color: #db2777; border-radius: 6px; font-size: 14px; height: 36px; display: inline-flex; align-items: center; justify-content: center; min-width: 90px; font-weight: 700;">
+            Page {{ items_pagination.page }} of {{ items_pagination.pages }}
+        </div>
+
+        {% if items_pagination.has_next %}
+            <a href="{{ url_for('admin.shop_items', page=items_pagination.next_num, category=selected_category, start_date=start_date, end_date=end_date) }}" class="btn fw-bold shadow-none d-flex align-items-center justify-content-center" style="background-color: #db2777 !important; border: 1px solid #db2777 !important; color: #ffffff !important; height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: 700;">Next</a>
+        {% else %}
+            <button class="btn fw-bold d-flex align-items-center justify-content-center" disabled style="background-color: #f1f5f9 !important; border: 1px solid #cbd5e1 !important; color: #94a3b8 !important; height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: not-allowed;">Next</button>
+        {% endif %}
+
+    </div>
+    {% endif %}
+
+{% endif %}
+</div>
+
+
+
+
+<!-- THEMED MODAL CONTAINER -->
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true" style="font-family: sans-serif;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content" style="border: 1px solid #fbcfe8; border-radius: 12px; box-shadow: 0 10px 25px rgba(219,39,119,0.08); overflow: hidden;">
+            
+            <div class="modal-header" style="background-color: #ffffff; border-bottom: 1px solid #f1f5f9; padding: 16px 20px;">
+                <h5 class="modal-title" id="deleteProductModalLabel" style="color: #1e293b; font-weight: 700; font-size: 18px;">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="font-size: 12px; box-shadow: none;"></button>
+            </div>
+            
+            <div class="modal-body" style="background-color: #ffffff; padding: 24px 20px; color: #475569; font-size: 15px; line-height: 1.5; text-align: left;">
+                Are you sure you want to permanently delete <strong id="modal-product-name" style="color: #1e293b; font-weight: 700;">this product</strong>? This action cannot be undone.
+            </div>
+            
+            <div class="modal-footer" style="background-color: #f8fafc; border-top: 1px solid #f1f5f9; padding: 12px 20px; display: flex; gap: 12px;">
+                <button type="button" class="btn text-secondary" data-bs-dismiss="modal" style="background-color: #e2e8f0; border: none; font-weight: bold; border-radius: 6px; padding: 8px 16px; font-size: 14px; flex: 1; box-shadow: none;">Cancel</button>
+                <a id="modal-delete-confirm-btn" href="#" class="btn text-white" style="background-color: #db2777; border: none; font-weight: bold; border-radius: 6px; padding: 8px 16px; font-size: 14px; flex: 1; text-align: center; text-decoration: none; box-shadow: 0 4px 6px rgba(219,39,119,0.15);">Delete</a>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+const deleteProductModal = document.getElementById('deleteProductModal');
+if (deleteProductModal) {
+    deleteProductModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const itemId = button.getAttribute('data-id');
+        const itemName = button.getAttribute('data-name');
+        
+        document.getElementById('modal-product-name').textContent = itemName;
+        document.getElementById('modal-delete-confirm-btn').setAttribute('href', '/delete-item/' + itemId);
+    });
+}
+</script>
+{% endblock %}

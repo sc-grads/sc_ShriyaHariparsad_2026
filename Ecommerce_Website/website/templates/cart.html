@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %} Cart {% endblock %}
+
+{% block body %}
+<div class="container my-5" style="font-family: sans-serif; max-width: 800px;">
+    {% if cart %}
+    <div id="cart-view-container">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="mb-4" style="color: #1e293b; font-family: sans-serif; font-weight: 800; font-size: 32px;">Shopping Cart</h1>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        
+        <!-- TOP SECTION: CART ITEMS LIST -->
+        <div class="col-12">
+            <div class="card" style="background-color: #ffffff; border: 1px solid #fbcfe8; color: #2d3748; border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(219,39,119,0.02);">
+                {% for item in cart %}
+                <div class="cart-item-row" style="display: flex; gap: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+                    
+                    <div style="display: flex; align-items: center; gap: 20px; flex: 1; min-width: 240px;">
+                        <div style="width: 80px; height: 80px; background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 6px; flex-shrink: 0;">
+                            <img src="/{{ item.product.product_picture }}" alt="" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        </div>
+                        <div>
+                            <h3 style="margin: 0 0 6px 0; font-family: sans-serif; color: #1e293b; font-weight: 700; font-size: 18px;">{{ item.product.product_name }}</h3>
+                            <div style="font-weight: 700; color: #b45309; font-size: 16px;">
+                                R {{ "%.2f"|format(item.product.current_price) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 24px; justify-content: space-between; min-width: 220px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <a class="minus-cart btn" pid="{{item.id}}" style="cursor: pointer; text-decoration: none; color: #db2777; font-weight: bold; font-size: 20px; display: inline-flex; align-items: center; padding: 0;"><i class="fas fa-minus-square"></i></a>
+                            <span id="quantity" style="font-weight: bold; font-size: 16px; margin: 0 8px; color: #1e293b; min-width: 24px; text-align: center;">{{ item.quantity }}</span>
+                            <a class="plus-cart btn" pid="{{ item.id }}" style="cursor: pointer; text-decoration: none; color: #db2777; font-weight: bold; font-size: 20px; display: inline-flex; align-items: center; padding: 0;"><i class="fas fa-plus-square"></i></a>
+                        </div>
+                        <div>
+                            <a href="" class="remove-cart btn btn-sm text-white" style="background-color: #d9534f; border: none; padding: 8px 16px; border-radius: 6px; text-decoration: none; color: white; font-size: 13px; font-weight: bold; cursor: pointer;" pid="{{item.id}}">Remove</a>
+                        </div>
+                    </div>
+
+                </div>
+                {% if not loop.last %}
+                <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 20px 0;">
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- BOTTOM SECTION: SUMMARY & DELIVERY DETAILS -->
+        <div class="col-12">
+            <div class="card" style="background-color: #ffffff; border: 1px solid #fbcfe8; color: #2d3748; border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(219,39,119,0.02);">
+                <h3 style="margin: 0 0 15px 0; font-family: sans-serif; color: #1e293b; font-weight: 700; font-size: 20px;">Cart Summary</h3>
+                <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 10px 0;">
+                
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                    {% for item in cart %}
+<div id="summary-row-{{ item.id }}" style="display: flex; justify-content: space-between; font-size: 15px; color: #475569;">
+    <strong style="color: #334155; font-weight: 600;">{{item.product.product_name}}</strong>
+    <span style="color: #64748b;">R {{"%.2f"|format(item.product.current_price)}} X <span id="summary-qty-{{ item.id }}">{{ item.quantity }}</span></span>
+</div>
+{% endfor %}
+
+                </div>
+
+                <div style="border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 16px 0; display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 15px; color: #334155; font-weight: 600;">
+                        <span>Subtotal</span>
+                        <span>R <span id="amount_tt">{{"%.2f"|format(amount)}}</span></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 15px; color: #334155; font-weight: 600;">
+                        <span>Delivery</span>
+                        <span>R <span>150.00</span></span>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 20px 0 0 0; color: #b45309; font-size: 20px;">
+                    <div><strong style="color: #1e293b; font-size: 16px;">Total</strong></div>
+                    <span><strong>R </strong><span id="totalamount"><strong>{{"%.2f"|format(total)}}</strong></span></span>
+
+                </div>
+
+                <form id="local_checkout_form" action="/place-order" method="POST" style="margin-top: 30px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
+                    <h4 style="color: #db2777; margin-bottom: 20px; margin-top: 0; font-family: sans-serif; font-weight: 700; font-size: 18px;">Delivery Information</h4>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-size: 13px; color: #475569; margin-bottom: 6px; font-weight: 600;">Street Address</label>
+                        <input type="text" name="address" value="{{ current_user.street_address if current_user.is_authenticated and current_user.street_address else '' }}" placeholder="e.g., 42 Strand Street" required style="width: 100%; padding: 12px; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #2d3748; box-sizing: border-box; font-size: 14px;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+                        <div style="flex: 7;">
+                            <label style="display: block; font-size: 13px; color: #475569; margin-bottom: 6px; font-weight: 600;">City / Suburb</label>
+                            <input type="text" name="city" value="{{ current_user.city if current_user.is_authenticated and current_user.city else '' }}" placeholder="e.g., Cape Town" required style="width: 100%; padding: 12px; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #2d3748; box-sizing: border-box; font-size: 14px;">
+                        </div>
+                        <div style="flex: 5;">
+                            <label style="display: block; font-size: 13px; color: #475569; margin-bottom: 6px; font-weight: 600;">Postal Code</label>
+                            <input type="text" name="postal_code" value="{{ current_user.postal_code if current_user.is_authenticated and current_user.postal_code else '' }}" placeholder="e.g., 8001" minlength="4" maxlength="4" pattern="\d{4}" oninput="this.value = this.value.replace(/[^0-9]/g, '')" title="Postal code must be exactly 4 digits" required style="width: 100%; padding: 12px; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #2d3748; box-sizing: border-box; font-size: 14px;">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <button type="submit" onclick="document.getElementById('local_checkout_form').submit(); return false;" style="width: 100%; padding: 14px; background-color: #db2777; border: none; border-radius: 8px; color: white; font-weight: bold; font-size: 15px; cursor: pointer; font-family: sans-serif; transition: background-color 0.2s ease; box-shadow: 0 4px 6px rgba(219,39,119,0.15);">PROCEED TO SECURE PAYMENT</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    </div>
+    {% else %}
+    <div id="cart-empty-container" style="text-align: center; padding: 60px 20px; background-color: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; max-width: 500px; margin: 40px auto; box-shadow: 0 4px 12px rgba(219,39,119,0.02);">
+        <div style="font-size: 48px; color: #f472b6; margin-bottom: 16px;"><i class="fas fa-shopping-basket"></i></div>
+        <h2 class="text-center" style="color: #0f172a; font-weight: 800; font-size: 26px; margin: 0 0 10px 0; letter-spacing: -0.5px;">Your Cart is Empty</h2>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Head back to our homepage to explore the collection</p>
+        <a href="/" class="btn btn-sm text-white" style="background-color: #db2777; padding: 10px 20px; border-radius: 6px; font-weight: bold; text-decoration: none; display: inline-block;">Return to Home Page</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+
+        
+
+
+
+
+
+
+
+
+

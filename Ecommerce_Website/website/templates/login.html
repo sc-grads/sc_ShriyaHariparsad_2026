@@ -1,0 +1,193 @@
+{% extends 'forms.html' %}
+
+{% block title %} Login {% endblock %}
+
+{% block body %}
+
+<style>
+    .base, #base-signup, body {
+        background: #fff0f3 !important; 
+        height: auto !important;
+        min-height: unset !important;
+    }
+
+    .minimal-login-wrapper {
+        min-height: 100vh;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        padding: 60px 20px;
+        box-sizing: border-box;
+        background: #fff0f3 !important;
+    }
+
+    .minimal-card {
+        width: 100%;
+        max-width: 400px;
+        padding: 40px;
+        background: #ffffff !important;
+        border: 1px solid #ffe3e8 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(219, 39, 119, 0.08) !important;
+    }
+
+    .minimal-card h3 {
+        color: #2d3748 !important;
+        font-size: 1.85rem !important;
+        font-weight: 700 !important;
+        text-align: left !important;
+        margin-bottom: 6px !important;
+        letter-spacing: -0.5px !important;
+    }
+
+    .minimal-card .subtitle {
+        color: #718096 !important;
+        font-size: 0.95rem !important;
+        margin-bottom: 32px !important;
+        text-align: left !important;
+    }
+
+    .input-field-group {
+        position: relative !important;
+        margin-bottom: 24px !important;
+        display: flex !important;
+        flex-direction: column !important; 
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        height: auto !important;
+        width: 100% !important;
+    }
+
+    .input-field-group h4 {
+        color: #4a5568 !important;
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 6px !important;
+        text-align: left !important;
+    }
+
+    /* CAPTURES WTFORMS INPUT FIELDS WITH DARK TEXT FIX */
+    .input-field-group input,
+    .input-field-group input[type="text"],
+    .input-field-group input[type="email"],
+    .input-field-group input[type="password"] {
+        width: 100% !important;
+        height: 42px !important;
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding: 0 14px !important;
+        font-size: 0.95rem !important;
+        color: #1a202c !important; 
+        -webkit-text-fill-color: #1a202c !important;
+        outline: none !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease !important;
+        box-sizing: border-box !important;
+    }
+
+    /* MATCHES BRAND PINK SELECTION HIGHLIGHT */
+    .input-field-group input:focus {
+        border-color: #db2777 !important;
+        background: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.15) !important;
+    }
+
+    .action-container {
+        margin-top: 32px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 14px !important;
+        width: 100% !important;
+    }
+
+    /* SIGNATURE HOT PINK BUTTON */
+    .action-container input[type="submit"] {
+        width: 100% !important;
+        height: 44px !important;
+        background: #db2777 !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 6px !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: background 0.2s ease !important;
+        box-shadow: none !important;
+    }
+
+    .action-container input[type="submit"]:hover {
+        background: #c21d61 !important;
+    }
+
+    /* STYLED FOOTER SHORTCUT BUTTON LINK LAYOUTS */
+    .action-container .signup-btn-link {
+        width: 100% !important;
+        height: 44px !important;
+        background: transparent !important;
+        color: #db2777 !important;
+        border: 1px solid #fbcfe8 !important;
+        border-radius: 6px !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        box-sizing: border-box !important;
+    }
+
+    .action-container .signup-btn-link:hover {
+        background: #fff0f3 !important;
+        border-color: #db2777 !important;
+    }
+
+    .action-container .forgot-link {
+        text-align: center !important;
+        color: #4a5568 !important;
+        text-decoration: none !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+        transition: color 0.2s ease !important;
+        padding: 4px 0 !important;
+    }
+
+    .action-container .forgot-link:hover {
+        color: #db2777 !important;
+        text-decoration: underline !important;
+    }
+</style>
+
+<div class="minimal-login-wrapper">
+    <div class="minimal-card">
+        <h3>Log In</h3>
+        <p class="subtitle">Welcome back! Please enter your details.</p>
+        
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <div class="input-field-group">
+                <h4>Email Address</h4>
+                {{ form.email }}
+            </div>
+            
+            <div class="input-field-group">
+                <h4>Password</h4>
+                {{ form.password }}
+            </div>
+
+            <div class="action-container">
+                {{ form.submit() }}
+                <a href="/sign-up" class="signup-btn-link">Sign Up</a>
+                <a href="/forgot-password" class="forgot-link">Forgot Your Password?</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

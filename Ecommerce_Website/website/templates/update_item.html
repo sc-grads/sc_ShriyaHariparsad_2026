@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %} Update Shop Item {% endblock %}
+
+{% block body %}
+
+<style>
+    /* CUSTOM ACTIVE INTERACTION PINK HIGHLIGHT STYLING FOR FORM FIELDS */
+    .form-control:focus, .form-select:focus {
+        border-color: #db2777 !important;
+        box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.15) !important;
+    }
+    .form-check-input:checked {
+        background-color: #db2777 !important;
+        border-color: #db2777 !important;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            
+            <div class="card border-0 shadow" style="background-color: #ffffff; border-radius: 12px;">
+                
+                <div class="card-header border-0 text-center pt-4" style="background-color: transparent;">
+                    <h3 class="fw-bold" style="color: #333333;">
+                        Update Product
+                    </h3>
+                </div>
+
+                <div class="card-body px-4 pb-4">
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="color: #495057;">Product Name</label>
+                            {{ form.product_name(class="form-control", style="border-radius: 6px; border: 1px solid #ced4da; background-color: #ffffff; color: #212529;") }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="color: #495057;">Category</label>
+                            {{ form.category(class="form-select", style="border-radius: 6px; border: 1px solid #ced4da; background-color: #ffffff; color: #212529;") }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold" style="color: #495057;">Previous Price</label>
+                                {{ form.previous_price(class="form-control", style="border-radius: 6px; border: 1px solid #ced4da; background-color: #ffffff; color: #212529;") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold" style="color: #495057;">Current Price</label>
+                                {{ form.current_price(class="form-control", style="border-radius: 6px; border: 1px solid #ced4da; background-color: #ffffff; color: #212529;") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="color: #495057;">In Stock</label>
+                            {{ form.in_stock(class="form-control", style="border-radius: 6px; border: 1px solid #ced4da; background-color: #ffffff; color: #212529;") }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" style="color: #495057;">Product Picture</label>
+                            
+                            {% if item and item.product_picture %}
+                            <div class="mb-2">
+                                <p class="small text-muted mb-1">Current Picture:</p>
+                                <img src="{{ item.product_picture }}" class="img-thumbnail shadow-sm" style="max-height: 100px; object-fit: cover; border-radius: 6px;">
+                            </div>
+                            {% endif %}
+                            
+                            {{ form.product_picture(class="form-control", style="border-radius: 6px; border: 1px solid #ced4da; background-color: #ffffff; color: #212529;") }}
+                        </div>
+
+                        <div class="form-check mb-4">
+                            {{ form.flash_sale(class="form-check-input", style="cursor: pointer; border: 1px solid #ced4da;") }}
+                            <label class="form-check-label fw-semibold" style="color: #495057; cursor: pointer; margin-left: 5px;">
+                                Flash Sale
+                            </label>
+                        </div>
+
+                        <div class="d-grid mt-2">
+                            <!-- SIGNATURE HOT PINK THEME BUTTON -->
+                            {{ form.update_product(class="btn fw-bold text-white py-2 shadow-none", style="background-color: #db2777 !important; border: 1px solid #db2777 !important; border-radius: 6px;") }}
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+

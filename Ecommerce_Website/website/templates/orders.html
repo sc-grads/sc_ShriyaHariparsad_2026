@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %} My Orders {% endblock %}
+
+{% block body %}
+<div class="container my-5 text-dark">
+    <h2 class="mb-4" style="font-size: 26px; font-weight: 700; color: #1a252f; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Order History</h2>
+    
+    {% if not orders %}
+        <div class="alert alert-info bg-light text-dark border-secondary" style="font-size: 14px;">
+            You haven't placed any orders yet.
+        </div>
+    {% else %}
+        <div class="row">
+            {% set displayed_orders = [] %}
+            {% for order in orders %}
+                {% if order.payment_id not in displayed_orders %}
+                    {% if displayed_orders.append(order.payment_id) %}{% endif %}
+                    
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card bg-white border-light h-100" style="border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); background-color: #ffffff !important;">
+                            
+                            <div class="card-header border-light d-flex justify-content-between align-items-center py-3" style="background-color: #f8fafc !important; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 12px 15px;">
+                                <div style="font-size: 13px; color: #334155;">
+                                    <span style="color: #1e3a8a; font-size: 10px; font-weight: 800; display: block; letter-spacing: 0.5px; text-transform: uppercase;">PLACED ON</span>
+                                    <strong style="color: #0f172a;">{{ order.date_ordered.strftime('%Y-%m-%d') if order.date_ordered else 'N/A' }}</strong>
+                                </div>
+                                <div class="text-end" style="text-align: right;">
+                                    {% if order.status == 'Delivered' %}
+                                        <span class="badge bg-success text-white px-2 py-1" style="font-size: 11px; font-weight: 600; border-radius: 4px;">Delivered</span>
+                                    {% elif order.status == 'Out for Delivery' %}
+                                        <span class="badge bg-info text-white px-2 py-1" style="font-size: 11px; font-weight: 600; border-radius: 4px; background-color: #0284c7 !important;">Out for Delivery</span>
+                                    {% elif order.status == 'Returned & Refunded' %}
+                                        <span class="badge bg-danger text-white px-2 py-1" style="font-size: 11px; font-weight: 600; border-radius: 4px;">Refunded</span>
+                                    {% elif order.status == 'Cancelled' %}
+                                        <span class="badge bg-secondary text-white px-2 py-1" style="font-size: 11px; font-weight: 600; border-radius: 4px;">Cancelled</span>
+                                    {% else %}
+                                        <span class="badge px-2 py-1" style="font-size: 11px; font-weight: 700; border-radius: 4px; background-color: #fef08a !important; color: #854d0e !important;">Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="card-body py-3" style="padding: 15px;">
+                                <div style="margin-bottom: 14px; font-size: 13px;">
+                                    <span style="color: #1e3a8a; font-size: 10px; font-weight: 800; display: block; letter-spacing: 0.5px; text-transform: uppercase;">TRANSACTION ID</span>
+                                    <span style="font-family: monospace; color: #334155; font-weight: 700;">{{ order.payment_id }}</span>
+                                </div>
+
+                                <div style="border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 12px 0; margin-bottom: 15px;">
+                                    {% set order_total = [] %}
+                                    <!-- LOOPS THROUGH CURRENT TEMPLATE COLLECTION CONTEXT TO PREVENT BLANK OUTPUT CARDS -->
+                                    {% for item in orders if item.payment_id == order.payment_id %}
+                                        {% if order_total.append(item.price * item.quantity) %}{% endif %}
+                                        
+                                        <div class="d-flex align-items-center {% if not loop.last %}mb-3{% endif %}" style="display: flex; align-items: center; justify-content: space-between;">
+                                            <div class="d-flex align-items-center" style="display: flex; align-items: center; gap: 12px;">
+                                                <img src="/{{ item.product.product_picture }}" class="rounded img-thumbnail" alt="Product Image" style="max-height: 48px; max-width: 48px; padding: 2px; background-color: #ffffff; border-color: #cbd5e1;">
+                                                <div>
+                                                    <p class="mb-0" style="font-weight: 700; font-size: 14px; margin: 0; color: #0f172a;">{{ item.product.product_name }}</p>
+                                                    <small style="color: #64748b; font-weight: 500;">Qty: {{ item.quantity }}</small>
+                                                </div>
+                                            </div>
+                                            <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                                                <span style="color: #0f172a; font-size: 14px; font-weight: 700;">R {{ "%.2f"|format(item.price) }}</span>
+                                                {% if order.status == 'Delivered' and not item.returns_logged %}
+                                                    <button type="button" class="btn btn-warning text-dark btn-sm py-0 px-2 mt-1" style="font-size: 11px; font-weight: 600; border-radius: 4px; background-color: #ffc107; border: none;" data-bs-toggle="modal" data-bs-target="#returnModal" onclick="setReturnOrderId('{{ item.id }}', '{{ item.product.product_name }}')">
+                                                        Log Return
+                                                    </button>
+                                                {% elif item.returns_logged %}
+                                                    {% set active_return_record = item.returns_logged[0] if item.returns_logged is iterable and item.returns_logged | length > 0 else item.returns_logged %}
+                                                    {% if active_return_record.status == 'Refund Processed' %}
+                                                        <span class="text-success small mt-1 d-block" style="font-weight: 700;">
+                                                             Refund Processed
+                                                        </span>
+                                                    {% elif active_return_record.status == 'Rejected' %}
+                                                        <span class="text-danger small mt-1 d-block" style="font-weight: 700;">
+                                                             Return Declined
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-muted small mt-1 d-block" style="font-weight: 600; font-style: italic;">
+                                                             Return Requested
+                                                        </span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+
+
+
+
+
+                                
+                                
+                                                                      <div style="background-color: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 13px; margin-bottom: 5px;">
+                                    <span style="color: #1e3a8a; font-size: 10px; font-weight: 800; display: block; letter-spacing: 0.5px; margin-bottom: 4px; text-transform: uppercase;"><i class="fas fa-map-marker-alt text-danger me-1"></i> DELIVERY ADDRESS</span>
+                                    <span style="color: #334155; font-weight: 600; line-height: 1.4; display: block;">{{ order.address }}, {{ order.city }}, {{ order.postal_code }}</span>
+                                </div>
+                            </div>
+
+                            <div class="card-footer border-light py-3 mt-auto" style="background-color: #f8fafc !important; border-top: 1px solid #e2e8f0; padding: 12px 15px;">
+                                <div class="d-flex justify-content-between align-items-center" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <span style="color: #475569; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">TOTAL PAID</span>
+                                    <h4 class="mb-0" style="color: #b45309 !important; font-weight: 800; font-size: 17px; margin: 0;">R {{ "%.2f"|format(order_total|sum + 150.0) }}</h4>
+                                </div>
+                                <div class="row mt-2" style="margin: 0; padding: 0;">
+                                    <div class="col-12" style="padding: 0;">
+                                        <a href="{{ url_for('views.print_receipt', order_id=order.id) }}" target="_blank" class="btn btn-sm text-white fw-bold d-block w-100" style="background-color: #db2777; border-radius: 6px; padding: 8px; font-size: 13px; text-decoration: none; border: none; box-shadow: none;">
+                                            Print Invoice
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- DYNAMIC PINK NAVIGATION CONTROLS FOR CUSTOMER HISTORY -->
+        {% if orders_pagination and orders_pagination.pages > 1 %}
+        <div class="d-flex justify-content-center align-items-center mt-4 gap-2 mb-4" style="font-family: sans-serif; clear: both; width: 100%;">
+            {% if orders_pagination.has_prev %}
+                <a href="{{ url_for('views.orders', page=orders_pagination.prev_num) }}" class="btn fw-bold shadow-none d-flex align-items-center justify-content-center" style="background-color: #db2777 !important; border: 1px solid #db2777 !important; color: #ffffff !important; height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: 700;">Previous</a>
+            {% else %}
+                <button class="btn fw-bold d-flex align-items-center justify-content-center" disabled style="background-color: #f1f5f9 !important; border: 1px solid #cbd5e1 !important; color: #94a3b8 !important; height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: not-allowed;">Previous</button>
+            {% endif %}
+
+            <div class="px-3 py-1 bg-white border fw-bold shadow-sm" style="border-color: #fbcfe8 !important; color: #db2777; border-radius: 6px; font-size: 14px; height: 36px; display: inline-flex; align-items: center; justify-content: center; min-width: 90px; font-weight: 700;">
+                Page {{ orders_pagination.page }} of {{ orders_pagination.pages }}
+            </div>
+
+            {% if orders_pagination.has_next %}
+                <a href="{{ url_for('views.orders', page=orders_pagination.next_num) }}" class="btn fw-bold shadow-none d-flex align-items-center justify-content-center" style="background-color: #db2777 !important; border: 1px solid #db2777 !important; color: #ffffff !important; height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: 700;">Next</a>
+            {% else %}
+                <button class="btn fw-bold d-flex align-items-center justify-content-center" disabled style="background-color: #f1f5f9 !important; border: 1px solid #cbd5e1 !important; color: #94a3b8 !important; height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: not-allowed;">Next</button>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    {% endif %}
+</div>
+
+<!-- BEAUTIFIED BRAND COMPLIANT RETURN WINDOW MODAL BOX -->
+<div class="modal fade text-dark" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; border: 1px solid #fbcfe8; box-shadow: 0 10px 25px rgba(0,0,0,0.08); background-color: #ffffff;">
+            <div class="modal-header" style="background-color: #fdf2f8; border-bottom: 1px solid #fbcfe8; padding: 16px 20px;">
+                <h5 class="modal-title fw-bold" id="returnModalLabel" style="color: #000000; font-size: 16px; letter-spacing: 0.3px;">Log a Product Return</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="font-size: 12px;"></button>
+            </div>
+            <form action="/submit-return-request" method="POST" style="margin: 0;">
+                <div class="modal-body" style="padding: 24px 20px;">
+                    <input type="hidden" name="order_id" id="modal_order_id">
+                    <p style="font-size: 14px; color: #475569; margin-bottom: 18px; line-height: 1.4;">
+                        You are requesting a return for: <strong id="modal_product_name" style="color: #0f172a; font-weight: 700;"></strong>
+                    </p>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold mb-1.5" style="font-size: 13px; color: #334155; letter-spacing: 0.2px;">Reason for return:</label>
+                        <textarea class="form-control" name="reason" rows="4" placeholder="Please tell us why you want to return this item (e.g., incompatible with my setup, item faulty...)" required style="border: 1px solid #cbd5e1; padding: 12px; font-size: 14px; border-radius: 6px; color: #2d3748; background-color: #ffffff; resize: none; box-shadow: none;" onfocus="this.style.borderColor='#db2777'; this.style.boxShadow='0 0 0 3px rgba(219,39,119,0.1)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 12px 20px;">
+                    <button type="button" class="btn btn-sm btn-secondary fw-semibold px-3 py-2" data-bs-dismiss="modal" style="font-size: 13px; border-radius: 6px; background-color: #64748b; border: none; color: white;">Cancel</button>
+                    <!-- UPDATED THEME BUTTON COLOR TO BRAND HOT-PINK -->
+                    <button type="submit" class="btn btn-sm text-white fw-bold px-4 py-2" style="background-color: #db2777; border: none; font-size: 13px; border-radius: 6px; box-shadow: 0 4px 6px rgba(219,39,119,0.15);">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function setReturnOrderId(orderId, productName) {
+    document.getElementById('modal_order_id').value = orderId;
+    document.getElementById('modal_product_name').innerText = productName;
+}
+</script>
+{% endblock %}
+

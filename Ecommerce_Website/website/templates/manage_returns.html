@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %} Admin - Manage Returns {% endblock %}
+
+{% block body %}
+<style>
+    /* FORCES EVERY SINGLE ROW BACKDROP TO STAY SOLID WHITE */
+    .table-custom-flat tbody tr {
+        background-color: #ffffff !important;
+    }
+    .table-custom-flat tbody tr:hover {
+        background-color: #f8fafc !important; /* Soft clean hover highlight */
+    }
+    /* STRIPS AUTOMATIC BLUE HYPERLINKS FROM THE EMAIL STRINGS */
+    .customer-details-cell a, 
+    .customer-details-cell span {
+        color: #475569 !important;
+        text-decoration: none !important;
+    }
+</style>
+
+<div class="container-fluid my-5 text-dark" style="background-color: #ffffff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); max-width: 98%;">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3" style="border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">
+        <h2 class="mb-0" style="color: #1a252f; font-weight: 700; font-size: 30px;">Customer Returns Queue</h2>
+        
+        <form method="GET" action="/manage-returns" id="returnFilterForm" class="m-0">
+            <select name="return_status_filter" class="form-select fw-bold shadow-sm" style="background-color: #ffffff; border: 1px solid #fbcfe8; color: #db2777; border-radius: 6px; padding: 8px 36px 8px 16px; cursor: pointer; font-size: 14px; min-width: 200px; font-family: sans-serif; font-weight: 700;" onchange="document.getElementById('returnFilterForm').submit()">
+                <option value="" style="color: #2d3748;">All Returns</option>
+                <option value="Pending Review" {% if selected_return_status == 'Pending Review' %}selected{% endif %} style="color: #2d3748;">Pending Review</option>
+                <option value="Refund Processed" {% if selected_return_status == 'Refund Processed' %}selected{% endif %} style="color: #2d3748;">Refund Processed</option>
+                <option value="Rejected" {% if selected_return_status == 'Rejected' %}selected{% endif %} style="color: #2d3748;">Rejected</option>
+            </select>
+        </form>
+    </div>
+    
+    {% if not returns %}
+        <div class="alert alert-info bg-light text-dark border-secondary text-center" style="font-size: 16px;">
+            There are currently no customer returns logged in the queue.
+        </div>
+    {% else %}
+        <div class="table-responsive" style="overflow-x: hidden;">
+            <table class="table table-hover table-bordered align-middle mb-0 table-custom-flat" style="background-color: #ffffff; border-color: #e2e8f0; color: #334155; font-size: 14px; width: 100%; table-layout: fixed;">
+                <thead>
+                    <!-- BOLD BLACK HEADINGS MATCHING YOUR INVENTORY DASHBOARD -->
+                    <tr class="text-center" style="background-color: #f8fafc !important; color: #000000 !important; font-weight: 800 !important; border-bottom: 2px solid #cbd5e1; font-size: 14px; font-family: sans-serif;">
+                        <th style="padding: 12px; width: 6%; color: #000000 !important; font-weight: 800 !important; background-color: #f8fafc !important;">Order ID</th>
+                        <th style="padding: 12px; width: 10%; color: #000000 !important; font-weight: 800 !important; background-color: #f8fafc !important;">Date Logged</th>
+                        <th style="padding: 12px; width: 18%; color: #000000 !important; font-weight: 800 !important; background-color: #f8fafc !important;">Product Info</th>
+                        <th style="padding: 12px; width: 22%; color: #000000 !important; font-weight: 800 !important; background-color: #f8fafc !important;">Customer Details</th>
+                        <th style="padding: 12px; width: 16%; color: #000000 !important; font-weight: 800 !important; background-color: #f8fafc !important;">Reason for Return</th>
+                        <th style="padding: 12px; width: 5%; color: #000000 !important; font-weight: 800 !important; background-color: #f8fafc !important;">Qty</th>
+                        <th style="padding: 12px; width: 8%; color: #000000 !important; font-weight: 800 !important; background-color: #f8fafc !important;">Total Price</th>
+                        <th style="padding: 12px; width: 10%; color: #000000 !important; font-weight: 800 !important; background-color: #f8fafc !important;">Status</th>
+                        <th style="padding: 12px; width: 10%; color: #000000 !important; font-weight: 800 !important; background-color: #f8fafc !important;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+
+
+
+
+                            {% for item in returns %}
+                        <tr class="text-center" style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="font-weight: 600; color: #0f172a; padding: 10px;">#{{ item.order.id }}</td>
+                            <td style="font-weight: 600; color: #475569; padding: 10px; font-size: 13px; white-space: nowrap;">
+                                {{ item.date_logged.strftime('%Y-%m-%d') if item.date_logged else 'N/A' }}
+                            </td>
+                            <td style="padding: 10px; text-align: left;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="/{{ item.order.product.product_picture }}" class="rounded img-thumbnail flex-shrink-0" alt="Product Image" style="height: 38px; width: 38px; object-fit: contain; padding: 2px; background-color: #ffffff; border-color: #cbd5e1;">
+                                    <span style="font-weight: 700; color: #0f172a; font-size: 13px; line-height: 1.2; word-break: break-word;">{{ item.order.product.product_name }}</span>
+                                </div>
+                            </td>
+                            <td style="padding: 10px; text-align: left; font-size: 13px; line-height: 1.4;">
+                                <strong style="color: #0f172a; font-size: 14px; display: block; margin-bottom: 1px;">{{ item.order.customer.first_name }} {{ item.order.customer.last_name }}</strong>
+                                <span class="customer-details-cell" style="display: block; word-break: break-all;">{{ item.order.customer.email }}</span>
+                                <span style="font-family: monospace; color: #94a3b8; font-size: 11px; display: block; margin-top: 1px;">ID: {{ item.order.customer.id_number }}</span>
+                            </td>
+                            <td class="font-monospace text-start" style="font-size: 13px; word-break: break-word; color: #b45309; font-weight: 600; padding: 10px; line-height: 1.3;">
+                                "{{ item.reason }}"
+                            </td>
+                            <td style="font-weight: 700; color: #0f172a; padding: 10px;">{{ item.order.quantity }}</td>
+                            <td class="text-nowrap" style="font-weight: 700; color: #b45309; padding: 10px;">R {{ "%.1f"|format(item.order.price * item.order.quantity) }}</td>
+                            <td style="padding: 10px;">
+                                <span class="badge {% if item.status == 'Refund Processed' %}bg-success text-white{% elif item.status == 'Rejected' %}bg-danger text-white{% else %}bg-warning text-dark{% endif %} py-1.5 px-2" style="border-radius: 4px; font-size: 12px; display: inline-block; min-width: 110px; font-weight: 600; width: 100%;">
+                                    {{ item.status }}
+                                </span>
+                            </td>
+                            <td style="padding: 10px;">
+                                {% if item.status == 'Pending Review' %}
+                                <div style="display: flex; gap: 6px; justify-content: center; width: 100%;">
+                                    <form action="{{ url_for('admin.process_return_action', return_id=item.id) }}" method="POST" style="margin: 0; flex: 1;">
+                                        <input type="hidden" name="action_type" value="Approve">
+                                        <button type="submit" class="btn btn-sm btn-success text-white w-100" style="font-size: 12px; font-weight: bold; border-radius: 4px; border: none; height: 30px; padding: 0;">Approve</button>
+                                    </form>
+                                    <form action="{{ url_for('admin.process_return_action', return_id=item.id) }}" method="POST" style="margin: 0; flex: 1;">
+                                        <input type="hidden" name="action_type" value="Reject">
+                                        <button type="submit" class="btn btn-sm btn-danger text-white w-100" style="font-size: 12px; font-weight: bold; border-radius: 4px; border: none; height: 30px; padding: 0;">Reject</button>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <span class="text-muted" style="font-weight: 600; font-size: 13px;">Settled</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+                <!-- DYNAMIC PINK NAVIGATION CONTROLS -->
+        {% if returns_pagination and returns_pagination.pages > 1 %}
+        <div class="d-flex justify-content-center align-items-center mt-4 gap-2 mb-2" style="font-family: sans-serif;">
+            {% if returns_pagination.has_prev %}
+                <a href="{{ url_for('admin.manage_returns', page=returns_pagination.prev_num, return_status_filter=selected_return_status) }}" class="btn fw-bold shadow-none d-flex align-items-center justify-content-center" style="background-color: #db2777 !important; border: 1px solid #db2777 !important; color: #ffffff !important; height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: 700;">Previous</a>
+            {% else %}
+                <button class="btn fw-bold d-flex align-items-center justify-content-center" disabled style="background-color: #f1f5f9 !important; border: 1px solid #cbd5e1 !important; color: #94a3b8 !important; height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: not-allowed;">Previous</button>
+            {% endif %}
+
+            <div class="px-3 py-1 bg-white border fw-bold shadow-sm" style="border-color: #fbcfe8 !important; color: #db2777; border-radius: 6px; font-size: 14px; height: 36px; display: inline-flex; align-items: center; justify-content: center; min-width: 90px; font-weight: 700;">
+                Page {{ returns_pagination.page }} of {{ returns_pagination.pages }}
+            </div>
+
+            {% if returns_pagination.has_next %}
+                <a href="{{ url_for('admin.manage_returns', page=returns_pagination.next_num, return_status_filter=selected_return_status) }}" class="btn fw-bold shadow-none d-flex align-items-center justify-content-center" style="background-color: #db2777 !important; border: 1px solid #db2777 !important; color: #ffffff !important; height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; text-decoration: none; font-weight: 700;">Next</a>
+            {% else %}
+                <button class="btn fw-bold d-flex align-items-center justify-content-center" disabled style="background-color: #f1f5f9 !important; border: 1px solid #cbd5e1 !important; color: #94a3b8 !important; height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: not-allowed;">Next</button>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    {% endif %}
+</div>
+{% endblock %}

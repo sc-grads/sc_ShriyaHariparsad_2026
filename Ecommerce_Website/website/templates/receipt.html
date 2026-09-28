@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Receipt_Order_{{ order.id }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 40px; color: #334155; }
+        .header { border-bottom: 2px solid #db2777; padding-bottom: 12px; margin-bottom: 25px; }
+        .title { color: #db2777; font-size: 26px; font-weight: bold; }
+        .meta { margin-bottom: 25px; line-height: 1.6; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 25px; font-size: 14px; }
+        th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: left; }
+        th { background-color: #f8fafc; color: #000000; font-weight: bold; }
+    </style>
+</head>
+<body onload="window.print(); window.onafterprint = function(){ window.close(); }">
+
+    <div class="header">
+        <div class="title">STARLIGHTTECH</div>
+        <div style="font-weight: bold; margin-top: 4px;">Official Purchase Invoice Receipt</div>
+    </div>
+
+    <div class="meta">
+        <strong>Order Reference ID:</strong> #{{ order.id }}<br>
+        <strong>Transaction Reference ID:</strong> {{ order.payment_id }}<br>
+        <strong>Billed To:</strong> {{ order.customer.first_name }} {{ order.customer.last_name }} ({{ order.customer.email }})<br>
+        <strong>Shipping Destination Address:</strong> {{ order.address }}, {{ order.city }}, {{ order.postal_code }}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Product Description</th>
+                <th>Unit Price</th>
+                <th>Qty</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ order.product.product_name }}</td>
+                <td>R {{ "%.2f"|format(order.price) }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>R {{ "%.2f"|format(order.price * order.quantity) }}</td>
+            </tr>
+            <tr>
+                <td colspan="2"></td>
+                <td><strong>Delivery Fee:</strong></td>
+                <td>R 150.00</td>
+            </tr>
+            <tr>
+                <td colspan="2"></td>
+                <td><strong>Grand Total:</strong></td>
+                <td><strong>R {{ "%.2f"|format((order.price * order.quantity) + 150) }}</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

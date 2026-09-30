@@ -54,11 +54,37 @@ def search():
         
     items = Product.query.filter(Product.product_name.like(f'%{search_query}%')).all()
     
+    if not current_user.is_authenticated:
+        guest_cart_data = session.get('guest_cart', {})
+        cart_items = []
+        for item_id_str, qty in guest_cart_data.items():
+            product = db.session.get(Product, int(item_id_str))
+            if product:
+                class MockCartItem:
+                    def __init__(self, prod, q):
+                        self.product = prod
+                        self.quantity = q
+                cart_items.append(MockCartItem(product, qty))
+                
+        guest_wishlist_data = session.get('guest_wishlist', [])
+        wish_items = []
+        for item_id in guest_wishlist_data:
+            product = db.session.get(Product, int(item_id))
+            if product:
+                class MockWishlistItem:
+                    def __init__(self, prod):
+                        self.product = prod
+                        self.id = prod.id
+                wish_items.append(MockWishlistItem(product))
+                
+        return render_template('search_results.html', items=items, cart=cart_items, wishlist=wish_items, query=search_query)
+
     is_customer = current_user.is_authenticated and session.get('user_type') == 'customer'
     cart_items = Cart.query.filter_by(customer_link=current_user.id).all() if is_customer else []
     wish_items = Wishlist.query.filter_by(customer_link=current_user.id).all() if is_customer else []
     
     return render_template('search_results.html', items=items, cart=cart_items, wishlist=wish_items, query=search_query)
+
 
 
 @views.route('/category/<path:val>')
@@ -85,8 +111,36 @@ def category_view(val):
     )
 
 @views.route('/add-to-cart/<int:item_id>')
-@login_required
 def add_to_cart(item_id):
+    if not current_user.is_authenticated:
+        item_to_add = db.session.get(Product, item_id)
+        if not item_to_add or item_to_add.in_stock <= 0:
+            flash("This product is currently out of stock.", category='error')
+            return redirect(request.referrer or url_for('views.home'))
+
+        if 'guest_cart' not in session:
+            session['guest_cart'] = {}
+        
+        item_id_str = str(item_id)
+        guest_cart = session['guest_cart']
+
+        current_qty = guest_cart.get(item_id_str, 0)
+        if current_qty >= item_to_add.in_stock:
+            flash(f"Cannot add more! Only {item_to_add.in_stock} units are currently available in stock.", category='error')
+            return redirect(request.referrer or url_for('views.home'))
+
+        guest_cart[item_id_str] = current_qty + 1
+        session['guest_cart'] = guest_cart
+        
+        if 'guest_wishlist' in session:
+            guest_wishlist = session['guest_wishlist']
+            if item_id in guest_wishlist:
+                guest_wishlist.remove(item_id)
+                session['guest_wishlist'] = guest_wishlist
+        
+        flash(f'{item_to_add.product_name} added to cart')
+        return redirect(request.referrer or url_for('views.home'))
+
     if session.get('user_type') == 'employee':
         flash("Employees cannot perform customer shopping actions.", category='error')
         return redirect(url_for('views.home'))
@@ -111,12 +165,10 @@ def add_to_cart(item_id):
                 db.session.delete(wish_to_clear)
                 
             db.session.commit()
-            # Log increment action event state change only
             current_app.logger.info(f"Cart Modification: Customer {current_user.email} increased quantity for product '{item_to_add.product_name}' (ID: {item_to_add.id})")
             flash(f'Quantity of { item_exists.product.product_name } has been updated')
             return redirect(request.referrer or url_for('views.home'))
         except Exception as e:
-            # Log structural storage runtime exception failures
             current_app.logger.error(f"Cart Exception: Failed incrementing product quantity for {current_user.email} - Error: {str(e)}")
             flash(f'Quantity of { item_exists.product.product_name } not updated')
             return redirect(request.referrer or url_for('views.home'))
@@ -134,16 +186,16 @@ def add_to_cart(item_id):
             db.session.delete(wish_to_clear)
             
         db.session.commit()
-        # Log a brand new creation entry event addition to cart database
         current_app.logger.info(f"New Cart Insertion: Customer {current_user.email} added product '{item_to_add.product_name}' (ID: {item_to_add.id}) to cart")
         flash(f'{new_cart_item.product.product_name} added to cart')
     except Exception as e:
         db.session.rollback()
-        # Log structural storage runtime exception failures
         current_app.logger.error(f"Cart Exception: Failed adding brand new product to cart registry for {current_user.email} - Error: {str(e)}")
         flash(f'{new_cart_item.product.product_name} has not been added to cart')
 
     return redirect(request.referrer or url_for('views.home'))
+
+
 
 
 @views.route('/cart')
@@ -153,8 +205,24 @@ def show_cart():
         return redirect(url_for('views.home'))
 
     if not current_user.is_authenticated:
-        last_logged_record = Order.query.order_by(Order.id.desc()).first()
-        active_customer_id = last_logged_record.customer_link if last_logged_record else None
+        guest_cart_data = session.get('guest_cart', {})
+        cart = []
+        amount = 0
+        
+        for item_id_str, qty in guest_cart_data.items():
+            product = db.session.get(Product, int(item_id_str))
+            if product:
+                class MockCartItem:
+                    def __init__(self, prod, q):
+                        self.product = prod
+                        self.quantity = q
+                
+                cart.append(MockCartItem(product, qty))
+                amount += product.current_price * qty
+        
+        wish_items = []
+        return render_template('cart.html', cart=cart, wishlist=wish_items, amount=amount, total=amount+150, guest_address=session.get('guest_address', ''), guest_city=session.get('guest_city', ''), guest_postal_code=session.get('guest_postal_code', ''))
+
     else:
         active_customer_id = current_user.id
 
@@ -171,14 +239,44 @@ def show_cart():
     return render_template('cart.html', cart=cart, wishlist=wish_items, amount=amount, total=amount+150)
 
 
+
 @views.route('/pluscart')
 def plus_cart():
     if session.get('user_type') == 'employee':
         return jsonify({"status": "fail", "message": "Unauthorized action"}), 403
 
     if not current_user.is_authenticated:
-        last_logged_record = Order.query.order_by(Order.id.desc()).first()
-        active_customer_id = last_logged_record.customer_link if last_logged_record else None
+        if request.method == 'GET':
+            cart_id = request.args.get('cart_id')
+            guest_cart_data = session.get('guest_cart', {})
+            
+            product_info = db.session.get(Product, int(cart_id)) if cart_id.isdigit() else None
+            current_qty = guest_cart_data.get(cart_id, 0)
+            
+            if product_info and current_qty >= product_info.in_stock:
+                return jsonify({"status": "fail", "message": f"Maximum available stock ({product_info.in_stock}) reached."}), 400
+                
+            if cart_id in guest_cart_data:
+                guest_cart_data[cart_id] += 1
+                session['guest_cart'] = guest_cart_data
+                current_qty = guest_cart_data[cart_id]
+
+            amount = 0
+            cart_length = 0
+            for item_id_str, qty in guest_cart_data.items():
+                product = db.session.get(Product, int(item_id_str))
+                if product:
+                    amount += product.current_price * qty
+                    cart_length += 1
+
+            data = {
+                'quantity': current_qty,
+                'amount': amount,
+                'total': amount + 150,
+                'cart_length': cart_length
+            }
+            return jsonify(data)
+
     else:
         active_customer_id = current_user.id
 
@@ -195,7 +293,6 @@ def plus_cart():
                 
             cart_item.quantity = cart_item.quantity + 1
             db.session.commit()
-            # Log active state quantity adjustment change event tracking metric
             user_log_name = current_user.email if current_user.is_authenticated else f"Anonymous (Guest matching ID: {active_customer_id})"
             current_app.logger.info(f"Cart Modification (Asynchronous): User {user_log_name} incremented quantity for cart entry #{cart_id}")
 
@@ -207,7 +304,8 @@ def plus_cart():
         data = {
             'quantity': cart_item.quantity if cart_item else 0,
             'amount': amount,
-            'total': amount + 150
+            'total': amount + 150,
+            'cart_length': len(cart)
         }
         return jsonify(data)
 
@@ -222,8 +320,34 @@ def minus_cart():
         return jsonify({"status": "fail", "message": "Unauthorized action"}), 403
 
     if not current_user.is_authenticated:
-        last_logged_record = Order.query.order_by(Order.id.desc()).first()
-        active_customer_id = last_logged_record.customer_link if last_logged_record else None
+        if request.method == 'GET':
+            cart_id = request.args.get('cart_id')
+            guest_cart_data = session.get('guest_cart', {})
+            
+            if cart_id in guest_cart_data:
+                if guest_cart_data[cart_id] <= 1:
+                    return jsonify({"status": "fail", "message": "Quantity cannot be less than 1."}), 400
+                
+                guest_cart_data[cart_id] -= 1
+                session['guest_cart'] = guest_cart_data
+
+            amount = 0
+            cart_length = 0
+            current_qty = guest_cart_data.get(cart_id, 0)
+            for item_id_str, qty in guest_cart_data.items():
+                product = db.session.get(Product, int(item_id_str))
+                if product:
+                    amount += product.current_price * qty
+                    cart_length += 1
+
+            data = {
+                'quantity': current_qty,
+                'amount': amount,
+                'total': amount + 150,
+                'cart_length': cart_length
+            }
+            return jsonify(data)
+
     else:
         active_customer_id = current_user.id
 
@@ -239,7 +363,6 @@ def minus_cart():
                 
             cart_item.quantity = cart_item.quantity - 1
             db.session.commit()
-            # Log active state quantity decrease event tracking metric
             user_log_name = current_user.email if current_user.is_authenticated else f"Anonymous (Guest ID: {active_customer_id})"
             current_app.logger.info(f"Cart Modification (Asynchronous): User {user_log_name} decremented quantity for cart entry #{cart_id}")
 
@@ -251,19 +374,44 @@ def minus_cart():
         data = {
             'quantity': cart_item.quantity if cart_item else 0,
             'amount': amount,
-            'total': amount + 150
+            'total': amount + 150,
+            'cart_length': len(cart)
         }
         return jsonify(data)
+
 
 
 @views.route('/removecart')
 def remove_cart():
     if session.get('user_type') == 'employee':
-        return jsonify({"status": "fail", "message": "Unauthorized action"}), 403
+        return jsonify({"status": "fail", "message": "Unauthorised action"}), 403
 
     if not current_user.is_authenticated:
-        last_logged_record = Order.query.order_by(Order.id.desc()).first()
-        active_customer_id = last_logged_record.customer_link if last_logged_record else None
+        if request.method == 'GET':
+            cart_id = request.args.get('cart_id')
+            guest_cart_data = session.get('guest_cart', {})
+            
+            removed_qty = 0
+            if cart_id in guest_cart_data:
+                removed_qty = guest_cart_data.pop(cart_id)
+                session['guest_cart'] = guest_cart_data
+
+            amount = 0
+            cart_length = 0
+            for item_id_str, qty in guest_cart_data.items():
+                product = db.session.get(Product, int(item_id_str))
+                if product:
+                    amount += product.current_price * qty
+                    cart_length += 1
+
+            data = {
+                'quantity': removed_qty,
+                'amount': amount,
+                'total': amount + 150,
+                'cart_length': cart_length
+            }
+            return jsonify(data)
+
     else:
         active_customer_id = current_user.id
 
@@ -277,11 +425,9 @@ def remove_cart():
             product_name = cart_item.product.product_name
             db.session.delete(cart_item)
             db.session.commit()
-            # Log database elimination deletion event change state
             user_log_name = current_user.email if current_user.is_authenticated else f"Anonymous (Guest ID: {active_customer_id})"
             current_app.logger.info(f"Cart Removal (Asynchronous): User {user_log_name} completely removed item '{product_name}' (Entry #{cart_id}) from cart")
 
-        # Fetch remaining items to compute correct counters
         cart = Cart.query.filter_by(customer_link=active_customer_id).all()
         amount = 0
         for item in cart:
@@ -298,8 +444,11 @@ def remove_cart():
 
 
 @views.route('/place-order', methods=['POST'])
-@login_required
 def place_order():
+    if not current_user.is_authenticated:
+        flash("Please log in to complete your checkout purchase.", category="error")
+        return redirect(url_for('auth.login'))
+
     if session.get('user_type') == 'employee':
         flash("Employees cannot place marketplace orders.", category='error')
         return redirect(url_for('views.home'))
@@ -319,7 +468,6 @@ def place_order():
 
     for item in customer_cart:
         if item.quantity > item.product.in_stock:
-            # Log concrete processing exception failure before flashing warnings
             current_app.logger.warning(f"Order Attempt Blocked: Out of stock scenario during validation checkpoint layout for customer {current_user.email} looking for product '{item.product.product_name}'")
             flash(f"Order failed! '{item.product.product_name}' only has {item.product.in_stock} items left in stock, but you have {item.quantity} in your cart.", category="error")
             return redirect(url_for('views.show_cart'))
@@ -354,7 +502,6 @@ def place_order():
 
     payfast_data['signature'] = generate_payfast_signature(payfast_data, PAYFAST_PASSPHRASE)
     
-    # Log a checkout redirection signature setup generation initialization event mapping metric
     current_app.logger.info(f"Checkout Initialized: Customer {current_user.email} generated PayFast payload for transaction reference '{custom_m_id}' totaling R{payfast_data['amount']}")
 
     return render_template('payfast_checkout.html', payfast_data=payfast_data, payfast_url=PAYFAST_URL)
@@ -450,12 +597,36 @@ def contact_us():
 
 
 @views.route('/wishlist')
-@login_required
 def wishlist():
     if session.get('user_type') == 'employee':
         flash("Employees do not manage shopper interest wishlists.", category='error')
         return redirect(url_for('views.home'))
         
+    if not current_user.is_authenticated:
+        guest_wishlist_data = session.get('guest_wishlist', [])
+        wishlist_items = []
+        for item_id in guest_wishlist_data:
+            product = db.session.get(Product, int(item_id))
+            if product:
+                class MockWishlistItem:
+                    def __init__(self, prod):
+                        self.product = prod
+                        self.id = prod.id
+                wishlist_items.append(MockWishlistItem(product))
+        
+        guest_cart_data = session.get('guest_cart', {})
+        cart_items = []
+        for item_id_str, qty in guest_cart_data.items():
+            product = db.session.get(Product, int(item_id_str))
+            if product:
+                class MockCartItem:
+                    def __init__(self, prod, q):
+                        self.product = prod
+                        self.quantity = q
+                cart_items.append(MockCartItem(product, qty))
+                
+        return render_template('wishlist.html', wishlist=wishlist_items, cart=cart_items)
+
     is_customer = current_user.is_authenticated and session.get('user_type') == 'customer'
     cart_items = Cart.query.filter_by(customer_link=current_user.id).all() if is_customer else []
     wishlist_items = Wishlist.query.filter_by(customer_link=current_user.id).all() if is_customer else []
@@ -463,9 +634,24 @@ def wishlist():
     return render_template('wishlist.html', wishlist=wishlist_items, cart=cart_items)
 
 
+
 @views.route('/add-to-wishlist/<int:item_id>')
-@login_required
 def add_to_wishlist(item_id):
+    if not current_user.is_authenticated:
+        if 'guest_wishlist' not in session:
+            session['guest_wishlist'] = []
+
+        guest_wishlist = session['guest_wishlist']
+        if item_id in guest_wishlist:
+            flash("This product is already present in your wishlist.", category='info')
+            return redirect(request.referrer or url_for('views.home'))
+
+        guest_wishlist.append(item_id)
+        session['guest_wishlist'] = guest_wishlist
+        
+        flash("Product added to wishlist successfully.", category='success')
+        return redirect(request.referrer or url_for('views.home'))
+
     if session.get('user_type') == 'employee':
         flash("Employees cannot perform wishlist actions.", category='error')
         return redirect(url_for('views.home'))
@@ -482,7 +668,6 @@ def add_to_wishlist(item_id):
     try:
         db.session.add(new_wish_item)
         db.session.commit()
-        # Log a brand new creation storage action on customer wishlists
         product_ref = db.session.get(Product, item_id)
         product_name = product_ref.product_name if product_ref else f"ID: {item_id}"
         current_app.logger.info(f"New Wishlist Insertion: Customer {current_user.email} saved product '{product_name}' to wishlist")
@@ -495,16 +680,23 @@ def add_to_wishlist(item_id):
     return redirect(request.referrer or url_for('views.home'))
 
 
+
 @views.route('/remove-from-wishlist/<int:wish_id>')
-@login_required
 def remove_from_wishlist(wish_id):
+    if not current_user.is_authenticated:
+        guest_wishlist = session.get('guest_wishlist', [])
+        if wish_id in guest_wishlist:
+            guest_wishlist.remove(wish_id)
+            session['guest_wishlist'] = guest_wishlist
+            flash("Product removed from wishlist.")
+        return redirect(url_for('views.wishlist'))
+
     wish_item = db.session.get(Wishlist, wish_id)
     if wish_item and wish_item.customer_link == current_user.id:
         try:
             product_name = wish_item.product.product_name if wish_item.product else f"ID: {wish_item.product_link}"
             db.session.delete(wish_item)
             db.session.commit()
-            # Log structural database elimination change step
             current_app.logger.info(f"Wishlist Removal: Customer {current_user.email} deleted product '{product_name}' from wishlist")
             flash("Product removed from wishlist.")
         except Exception as e:
@@ -512,6 +704,7 @@ def remove_from_wishlist(wish_id):
             current_app.logger.error(f"Wishlist Exception: Error removing row reference {wish_id} for {current_user.email} - Error: {str(e)}")
             flash("Could not remove item from wishlist.")
     return redirect(url_for('views.wishlist'))
+
 
 
 @views.route('/submit-return-request', methods=['POST'])
@@ -557,6 +750,16 @@ def print_receipt(order_id):
         
     current_app.logger.info(f"Receipt Print Triggered: Customer {current_user.email} opened print template view for Order #{order.id}")
     return render_template('receipt.html', order=order)
+
+
+
+@views.route('/save-guest-address', methods=['POST'])
+def save_guest_address():
+    session['guest_address'] = request.form.get('address', '').strip()
+    session['guest_city'] = request.form.get('city', '').strip()
+    session['guest_postal_code'] = request.form.get('postal_code', '').strip()
+    return jsonify({"status": "success"})
+
 
 
 

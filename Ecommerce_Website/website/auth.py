@@ -2,7 +2,7 @@ import os
 import re
 from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify, current_app 
 from .forms import LoginForm, SignUpForm, PasswordChangeForm
-from .models import Customer, Employee 
+from .models import Customer, Employee, Product, Cart, Wishlist
 from .import db
 from flask_login import login_user, login_required, logout_user, current_user
 from flask import session
@@ -28,16 +28,71 @@ def signup():
             new_customer.id_number = id_number
             new_customer.password = password2
 
+            if 'guest_address' in session:
+                new_customer.street_address = session.get('guest_address', '')
+                new_customer.city = session.get('guest_city', '')
+                new_customer.postal_code = session.get('guest_postal_code', '')
+
             try:
                 db.session.add(new_customer)
                 db.session.commit()
-                # Log the creation of a brand new customer registry entry
                 current_app.logger.info(f"New User Registration: Customer account successfully created for {email}")
+
+                session.pop('guest_address', None)
+                session.pop('guest_city', None)
+                session.pop('guest_postal_code', None)
+
+                if 'guest_wishlist' in session and session['guest_wishlist']:
+                    try:
+                        for wish_item_id in session['guest_wishlist']:
+                            wish_id = int(wish_item_id)
+                            wish_exists = Wishlist.query.filter_by(product_link=wish_id, customer_link=new_customer.id).first()
+                            if not wish_exists:
+                                new_wish_item = Wishlist()
+                                new_wish_item.product_link = wish_id
+                                new_wish_item.customer_link = new_customer.id
+                                db.session.add(new_wish_item)
+                        db.session.commit()
+                        session.pop('guest_wishlist', None)
+                    except Exception as wishlist_merge_error:
+                        db.session.rollback()
+                        current_app.logger.error(f"Wishlist Merge Exception during Sign Up for {email} - Error: {str(wishlist_merge_error)}")
+
+                if 'guest_cart' in session and session['guest_cart']:
+                    try:
+                        for item_id_str, qty in session['guest_cart'].items():
+                            item_id = int(item_id_str)
+                            product_info = db.session.get(Product, item_id)
+                            
+                            if not product_info:
+                                continue
+
+                            new_cart_item = Cart()
+                            if qty > product_info.in_stock:
+                                new_cart_item.quantity = product_info.in_stock
+                            else:
+                                new_cart_item.quantity = qty
+                            new_cart_item.product_link = item_id
+                            new_cart_item.customer_link = new_customer.id
+                            db.session.add(new_cart_item)
+
+                            wish_to_clear = Wishlist.query.filter_by(product_link=item_id, customer_link=new_customer.id).first()
+                            if wish_to_clear:
+                                db.session.delete(wish_to_clear)
+
+                        db.session.commit()
+                        session.pop('guest_cart', None)
+                        login_user(new_customer, remember=True)
+                        session['user_type'] = 'customer'
+                        return redirect(url_for('views.show_cart'))
+                    except Exception as merge_error:
+                        db.session.rollback()
+                        current_app.logger.error(f"Cart Merge Exception during Sign Up for {email} - Error: {str(merge_error)}")
+
                 flash('Account Created Successfully, You can now Login', category='success')
                 return redirect(url_for('auth.login'))
             except Exception as e:
                 db.session.rollback()
-                # Log registration failures when unique constraints block database commit entries
                 current_app.logger.warning(f"Registration Blocked: Duplicate email or ID attempt for {email}")
                 flash('Account Not Created!!, Email or ID number already exists', category='error')
 
@@ -49,6 +104,8 @@ def signup():
             form.password2.data = ''
 
     return render_template('signup.html', form=form)
+
+
 
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -63,11 +120,67 @@ def login():
             if customer.verify_password(password=password):
                 session['user_type'] = 'customer'
                 login_user(customer, remember=True)
-                # Log successful customer login
                 current_app.logger.info(f"Session Authenticated: Customer {email} logged in")
+
+                if 'guest_address' in session and session['guest_address']:
+                    try:
+                        customer.street_address = session.pop('guest_address')
+                        customer.city = session.pop('guest_city', customer.city)
+                        customer.postal_code = session.pop('guest_postal_code', customer.postal_code)
+                        db.session.commit()
+                    except Exception as addr_error:
+                        db.session.rollback()
+                        current_app.logger.error(f"Address Merge Exception during Login for {email} - Error: {str(addr_error)}")
+                else:
+                    session.pop('guest_address', None)
+                    session.pop('guest_city', None)
+                    session.pop('guest_postal_code', None)
+
+                if 'guest_wishlist' in session and session['guest_wishlist']:
+                    try:
+                        for wish_item_id in session['guest_wishlist']:
+                            wish_id = int(wish_item_id)
+                            wish_exists = Wishlist.query.filter_by(product_link=wish_id, customer_link=customer.id).first()
+                            if not wish_exists:
+                                new_wish_item = Wishlist()
+                                new_wish_item.product_link = wish_id
+                                new_wish_item.customer_link = customer.id
+                                db.session.add(new_wish_item)
+                        db.session.commit()
+                        session.pop('guest_wishlist', None)
+                    except Exception as wishlist_merge_error:
+                        db.session.rollback()
+                        current_app.logger.error(f"Wishlist Merge Exception during Login for {email} - Error: {str(wishlist_merge_error)}")
+
+                if 'guest_cart' in session and session['guest_cart']:
+                    try:
+                        for item_id_str, qty in session['guest_cart'].items():
+                            item_id = int(item_id_str)
+                            item_exists = Cart.query.filter_by(product_link=item_id, customer_link=customer.id).first()
+                            
+                            if item_exists:
+                                item_exists.quantity = item_exists.quantity + qty
+                            else:
+                                new_cart_item = Cart()
+                                new_cart_item.quantity = qty
+                                new_cart_item.product_link = item_id
+                                new_cart_item.customer_link = customer.id
+                                db.session.add(new_cart_item)
+
+                            wish_to_clear = Wishlist.query.filter_by(product_link=item_id, customer_link=customer.id).first()
+                            if wish_to_clear:
+                                db.session.delete(wish_to_clear)
+
+                        db.session.commit()
+                        session.pop('guest_cart', None)
+                    except Exception as e:
+                        db.session.rollback()
+                        current_app.logger.error(f"Cart Merge Exception: Failed moving guest cart to registry for {email} - Error: {str(e)}")
+
+                    return redirect(url_for('views.show_cart'))
+
                 return redirect(url_for('views.home'))
             else:
-                # Log wrong password choice tracking event mapping
                 current_app.logger.warning(f"Failed Login Attempt: Incorrect password entered for customer account {email}")
                 flash('Incorrect Email or Password', category='error')
                 return render_template('login.html', form=form)
@@ -77,20 +190,20 @@ def login():
             if employee_user.verify_password(password=password):
                 session['user_type'] = 'employee'
                 login_user(employee_user, remember=True)
-                # Log successful employee login
                 current_app.logger.info(f"Session Authenticated: Staff member {email} logged in [Role: {employee_user.role}]")
                 return redirect(url_for('views.home'))
             else:
-                # Log wrong password choice tracking event mapping
                 current_app.logger.warning(f"Failed Login Attempt: Incorrect password entered for staff account {email}")
                 flash('Incorrect Email or Password', category='error')
                 return render_template('login.html', form=form)
 
-        # Log when login attempt email doesn't match any system instance
         current_app.logger.warning(f"Failed Login Attempt: Email {email} does not exist in the database system")
         flash('Account does not exist please Sign Up', category='error')
 
     return render_template('login.html', form=form)
+
+
+
 
 
 @auth.route('/logout', methods=['GET', 'POST'])

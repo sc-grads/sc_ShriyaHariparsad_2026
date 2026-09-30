@@ -57,7 +57,7 @@
 
 
 
-                                    {% for order in orders %}
+{% for order in orders %}
                         <tr class="text-center" style="border-bottom: 1px solid #e2e8f0;">
                             <td style="font-weight: 600; color: #0f172a; padding: 8px;">#{{ order.id }}</td>
                             <td style="font-weight: 600; color: #475569; padding: 8px; font-size: 12px; white-space: nowrap;">
@@ -85,11 +85,24 @@
                                 </span>
                             </td>
                             <td style="padding: 8px;">
-                                <select class="form-select form-select-sm border-secondary text-dark" style="background-color: #ffffff; border: 1px solid #cbd5e1; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; width: 100%; height: 32px;" onchange="updateOrderStatus('{{ order.id }}', this.value)">
+                                <!-- Dropdown disables entirely if order is already completed, cancelled, or refunded -->
+                                <select class="form-select form-select-sm border-secondary text-dark" 
+                                        style="background-color: #ffffff; border: 1px solid #cbd5e1; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; width: 100%; height: 32px;" 
+                                        onchange="updateOrderStatus('{{ order.id }}', this.value)"
+                                        {% if order.status == 'Delivered' or order.status == 'Cancelled' or order.status == 'Returned & Refunded' %}disabled{% endif %}>
+                                    
                                     <option value="" selected disabled>Status</option>
-                                    <option value="Pending Delivery">Pending Delivery</option>
-                                    <option value="Out for Delivery">Out for Delivery</option>
-                                    <option value="Delivered">Delivered</option>
+                                    
+                                    <!-- 1. Pending Delivery (Locked out after advancing to avoid stepping backward) -->
+                                    <option value="Pending Delivery" {% if order.status != 'Pending Delivery' %}disabled{% endif %}>Pending Delivery</option>
+                                    
+                                    <!-- 2. Out for Delivery (Only accessible if current state is Pending) -->
+                                    <option value="Out for Delivery" {% if order.status != 'Pending Delivery' %}disabled{% endif %}>Out for Delivery</option>
+                                    
+                                    <!-- 3. Delivered (Locked when Pending; unlocked once status is Out for Delivery) -->
+                                    <option value="Delivered" {% if order.status == 'Pending Delivery' %}disabled{% endif %}>Delivered</option>
+                                    
+                                    <!-- 4. Cancelled (Remains available to cancel from Pending or Out for Delivery) -->
                                     <option value="Cancelled">Cancelled</option>
                                 </select>
                             </td>
@@ -102,7 +115,7 @@
 
 
 
-                <!-- DYNAMIC PINK NAVIGATION CONTROLS -->
+<!-- DYNAMIC PINK NAVIGATION CONTROLS -->
         {% if orders_pagination and orders_pagination.pages > 1 %}
         <div class="d-flex justify-content-center align-items-center mt-4 gap-2 mb-2" style="font-family: sans-serif;">
             {% if orders_pagination.has_prev %}
@@ -128,22 +141,21 @@
 
 <script>
 function updateOrderStatus(orderId, newStatus) {
-    fetch('/api/update-order-status', {
+    var formData = new FormData();
+    formData.append('status', newStatus);
+
+    fetch('/update-order-status/' + orderId, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            order_id: orderId,
-            status: newStatus
-        })
+        body: formData
     })
     .then(function(response) {
-        return response.json();
-    })
-    .then(function(data) {
-        if (data.status === 'success') {
-            var badge = document.getElementById('status-badge-' + orderId);
+        if (response.redirected) {
+            window.location.href = response.url;
+            return;
+        }
+        
+        var badge = document.getElementById('status-badge-' + orderId);
+        if (badge) {
             badge.innerText = newStatus;
             
             if (newStatus === 'Delivered') {
@@ -162,17 +174,31 @@ function updateOrderStatus(orderId, newStatus) {
             badge.style.display = "inline-block";
             badge.style.minWidth = "95px";
             badge.style.width = "100%";
-        } else {
-            alert('Failed to update status: ' + data.message);
+        }
+
+        var selectMenu = document.getElementById('status-badge-' + orderId).closest('tr').querySelector('select');
+        if (selectMenu) {
+            if (newStatus === 'Delivered' || newStatus === 'Cancelled' || newStatus === 'Returned & Refunded') {
+                selectMenu.disabled = true;
+            } else if (newStatus === 'Out for Delivery') {
+                var pendingOpt = selectMenu.querySelector('option[value="Pending Delivery"]');
+                var outOpt = selectMenu.querySelector('option[value="Out for Delivery"]');
+                var deliveredOpt = selectMenu.querySelector('option[value="Delivered"]');
+                
+                if (pendingOpt) pendingOpt.disabled = true;
+                if (outOpt) outOpt.disabled = true;
+                if (deliveredOpt) deliveredOpt.disabled = false;
+            }
+            selectMenu.value = "";
         }
     })
     .catch(function(error) {
         console.error('Error:', error);
-        alert('An error occurred while updating status.');
     });
 }
 </script>
 {% endblock %}
+
 
 
 

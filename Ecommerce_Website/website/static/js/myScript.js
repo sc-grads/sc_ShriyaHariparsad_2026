@@ -122,6 +122,33 @@ $('.remove-cart').click(function(e){
     })
 })
 
+$(document).on('submit', '#local_checkout_form', function(e){
+    var isGuest = $('#nav-cart').text().indexOf('Log Out') === -1 && $('.dropdown-item[href="/logout"]').length === 0;
+    
+    if (isGuest) {
+        e.preventDefault();
+        var formElement = this;
+
+        var addressInput = $('input[name="address"]').val();
+        var cityInput = $('input[name="city"]').val();
+        var postalInput = $('input[name="postal_code"]').val();
+
+        $.ajax({
+            type: 'POST',
+            url: '/save-guest-address',
+            data: {
+                address: addressInput,
+                city: cityInput,
+                postal_code: postalInput
+            },
+            complete: function() {
+                formElement.submit();
+            }
+        });
+    }
+});
+
+
 
 
 

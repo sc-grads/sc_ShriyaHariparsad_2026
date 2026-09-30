@@ -54,12 +54,14 @@
 
                 </ul>
 
+                {% if '/profile/' not in request.path and '/orders' not in request.path and '/shop-items' not in request.path and '/add-shop-items' not in request.path and '/view-orders' not in request.path and '/manage-returns' not in request.path and '/update-item/' not in request.path %}
                 <form class="d-flex" role="search" action="/search" style="margin-right: 170px;" method="POST">
                     <input class="form-control me-2" name="search" type="search" placeholder="Search"
                         aria-label="Search">
                     <button class="btn" type="submit"
                         style="background-color: #87CEEB; color: white; border: none;">Search</button>
                 </form>
+                {% endif %}
 
             </div>
 
@@ -72,12 +74,20 @@
                         style="display: flex; align-items: center;">
                         <i class="fa fa-shopping-cart" aria-hidden="true" style="margin-right: 6px;"></i>
                         Cart
-                        {% if cart is defined and cart | length >= 1 %}
+                        {% if current_user.is_authenticated and cart is defined and cart | length >= 1 %}
                         <span class="count-badge"
                             style="background-color: #ffffff !important; color: #db2777 !important; border-radius: 20px; font-size: 11px; font-weight: 800; padding: 2px 7px; margin-left: 6px; display: inline-block; line-height: 1.4; border: 1px solid rgba(255, 255, 255, 0.4);">{{ cart | length }}</span>
+                        {% elif not current_user.is_authenticated and session.guest_cart is defined and session.guest_cart | length >= 1 %}
+                        <span class="count-badge"
+                            style="background-color: #ffffff !important; color: #db2777 !important; border-radius: 20px; font-size: 11px; font-weight: 800; padding: 2px 7px; margin-left: 6px; display: inline-block; line-height: 1.4; border: 1px solid rgba(255, 255, 255, 0.4);">{{ session.guest_cart | length }}</span>
                         {% endif %}
                     </a>
                 </li>
+
+
+
+
+
 
                 <li class="nav-item mx-2" id="items">
                     <a id="nav-wishlist" class="nav-link text-grey"
@@ -85,12 +95,16 @@
                         style="display: flex; align-items: center;">
                         <i class="fa fa-heart" aria-hidden="true" style="margin-right: 6px;"></i>
                         Wishlist
-                        {% if wishlist is defined and wishlist | length >= 1 %}
+                        {% if current_user.is_authenticated and wishlist is defined and wishlist | length >= 1 %}
                         <span class="count-badge"
                             style="background-color: #ffffff !important; color: #db2777 !important; border-radius: 20px; font-size: 11px; font-weight: 800; padding: 2px 7px; margin-left: 6px; display: inline-block; line-height: 1.4; border: 1px solid rgba(255, 255, 255, 0.4);">{{ wishlist | length }}</span>
+                        {% elif not current_user.is_authenticated and session.guest_wishlist is defined and session.guest_wishlist | length >= 1 %}
+                        <span class="count-badge"
+                            style="background-color: #ffffff !important; color: #db2777 !important; border-radius: 20px; font-size: 11px; font-weight: 800; padding: 2px 7px; margin-left: 6px; display: inline-block; line-height: 1.4; border: 1px solid rgba(255, 255, 255, 0.4);">{{ session.guest_wishlist | length }}</span>
                         {% endif %}
                     </a>
                 </li>
+
 
                 <li class="nav-item dropdown mx-2">
                     <a class="nav-link dropdown-toggle text-grey" href="#" role="button"
@@ -172,7 +186,7 @@
     {% for message in get_flashed_messages() %}
     <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 5px;">
         <strong>{{ message }}</strong>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-toggle="collapse" data-bs-target=".alert" aria-label="Close"></button>
     </div>
     {% endfor %}
 
@@ -201,4 +215,8 @@
 </body>
 
 </html>
+
+
+
+
 

@@ -196,7 +196,6 @@ def update_order_status(order_id):
         if order:
             new_status = request.form.get('status')
             
-            # Execute logging sequence exclusively on valid state transformations
             if order.status != new_status:
                 old_status = order.status
                 order.status = new_status
@@ -208,6 +207,7 @@ def update_order_status(order_id):
                 
         return redirect(url_for('admin.view_orders'))
     return render_template('404.html')
+
 
 
 @admin.route('/delete-item/<int:item_id>', methods=['GET', 'POST'])

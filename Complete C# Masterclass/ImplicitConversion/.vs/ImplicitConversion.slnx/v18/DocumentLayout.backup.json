@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\ImplicitConversion\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6D869CD9-5ABD-4B0D-B483-E217DF4ACBD7}|ImplicitConversion\\ImplicitConversion.csproj|c:\\sc_shriyahariparsad_2026\\complete c# masterclass\\implicitconversion\\implicitconversion\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D869CD9-5ABD-4B0D-B483-E217DF4ACBD7}|ImplicitConversion\\ImplicitConversion.csproj|solutionrelative:implicitconversion\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\ImplicitConversion\\ImplicitConversion\\Program.cs",
+              "RelativeDocumentMoniker": "ImplicitConversion\\Program.cs",
+              "ToolTip": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\ImplicitConversion\\ImplicitConversion\\Program.cs",
+              "RelativeToolTip": "ImplicitConversion\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-28T07:21:18.569Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

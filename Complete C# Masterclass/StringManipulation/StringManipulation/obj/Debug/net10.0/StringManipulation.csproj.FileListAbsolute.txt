@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\bin\Debug\net10.0\StringManipulation.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\bin\Debug\net10.0\StringManipulation.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\bin\Debug\net10.0\StringManipulation.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\bin\Debug\net10.0\StringManipulation.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\bin\Debug\net10.0\StringManipulation.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\obj\Debug\net10.0\StringManipulation.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\obj\Debug\net10.0\StringManipulation.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\obj\Debug\net10.0\StringManipulation.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\obj\Debug\net10.0\StringManipulation.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\obj\Debug\net10.0\StringManipulation.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\obj\Debug\net10.0\StringManipulation.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\obj\Debug\net10.0\refint\StringManipulation.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\obj\Debug\net10.0\StringManipulation.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\obj\Debug\net10.0\StringManipulation.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\obj\Debug\net10.0\ref\StringManipulation.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\StringManipulation\StringManipulation\obj\Debug\net10.0\StringMa.ED5353B1.Up2Date

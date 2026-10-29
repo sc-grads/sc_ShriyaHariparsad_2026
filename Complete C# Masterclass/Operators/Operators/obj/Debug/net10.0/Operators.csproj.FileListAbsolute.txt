@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\bin\Debug\net10.0\Operators.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\bin\Debug\net10.0\Operators.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\bin\Debug\net10.0\Operators.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\bin\Debug\net10.0\Operators.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\bin\Debug\net10.0\Operators.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\obj\Debug\net10.0\Operators.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\obj\Debug\net10.0\Operators.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\obj\Debug\net10.0\Operators.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\obj\Debug\net10.0\Operators.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\obj\Debug\net10.0\Operators.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\obj\Debug\net10.0\Operators.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\obj\Debug\net10.0\refint\Operators.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\obj\Debug\net10.0\Operators.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\obj\Debug\net10.0\Operators.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\obj\Debug\net10.0\ref\Operators.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Operators\Operators\obj\Debug\net10.0\Operators.csproj.Up2Date

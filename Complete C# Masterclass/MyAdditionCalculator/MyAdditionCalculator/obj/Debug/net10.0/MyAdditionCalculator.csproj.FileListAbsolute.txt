@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\bin\Debug\net10.0\MyAdditionCalculator.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\bin\Debug\net10.0\MyAdditionCalculator.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\bin\Debug\net10.0\MyAdditionCalculator.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\bin\Debug\net10.0\MyAdditionCalculator.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\bin\Debug\net10.0\MyAdditionCalculator.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\obj\Debug\net10.0\MyAdditionCalculator.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\obj\Debug\net10.0\MyAdditionCalculator.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\obj\Debug\net10.0\MyAdditionCalculator.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\obj\Debug\net10.0\MyAdditionCalculator.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\obj\Debug\net10.0\MyAdditionCalculator.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\obj\Debug\net10.0\MyAdditionCalculator.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\obj\Debug\net10.0\refint\MyAdditionCalculator.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\obj\Debug\net10.0\MyAdditionCalculator.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\obj\Debug\net10.0\MyAdditionCalculator.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\obj\Debug\net10.0\ref\MyAdditionCalculator.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\MyAdditionCalculator\MyAdditionCalculator\obj\Debug\net10.0\MyAdditi.6BAF345B.Up2Date

@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\bin\Debug\net10.0\Debugging.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\bin\Debug\net10.0\Debugging.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\bin\Debug\net10.0\Debugging.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\bin\Debug\net10.0\Debugging.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\bin\Debug\net10.0\Debugging.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\obj\Debug\net10.0\Debugging.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\obj\Debug\net10.0\Debugging.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\obj\Debug\net10.0\Debugging.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\obj\Debug\net10.0\Debugging.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\obj\Debug\net10.0\Debugging.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\obj\Debug\net10.0\Debugging.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\obj\Debug\net10.0\refint\Debugging.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\obj\Debug\net10.0\Debugging.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\obj\Debug\net10.0\Debugging.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\obj\Debug\net10.0\ref\Debugging.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Debugging\Debugging\obj\Debug\net10.0\Debugging.csproj.Up2Date

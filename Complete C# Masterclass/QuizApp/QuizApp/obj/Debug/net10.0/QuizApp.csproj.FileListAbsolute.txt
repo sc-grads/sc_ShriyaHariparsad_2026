@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\obj\Debug\net10.0\QuizApp.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\obj\Debug\net10.0\QuizApp.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\obj\Debug\net10.0\QuizApp.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\obj\Debug\net10.0\QuizApp.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\obj\Debug\net10.0\QuizApp.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\bin\Debug\net10.0\QuizApp.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\bin\Debug\net10.0\QuizApp.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\bin\Debug\net10.0\QuizApp.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\bin\Debug\net10.0\QuizApp.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\bin\Debug\net10.0\QuizApp.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\obj\Debug\net10.0\QuizApp.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\obj\Debug\net10.0\refint\QuizApp.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\obj\Debug\net10.0\QuizApp.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\obj\Debug\net10.0\QuizApp.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\obj\Debug\net10.0\ref\QuizApp.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\QuizApp\QuizApp\obj\Debug\net10.0\QuizApp.csproj.Up2Date

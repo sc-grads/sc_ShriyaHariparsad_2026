@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\bin\Debug\net10.0\WhileLoop.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\bin\Debug\net10.0\WhileLoop.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\bin\Debug\net10.0\WhileLoop.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\bin\Debug\net10.0\WhileLoop.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\bin\Debug\net10.0\WhileLoop.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\obj\Debug\net10.0\WhileLoop.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\obj\Debug\net10.0\WhileLoop.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\obj\Debug\net10.0\WhileLoop.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\obj\Debug\net10.0\WhileLoop.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\obj\Debug\net10.0\WhileLoop.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\obj\Debug\net10.0\WhileLoop.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\obj\Debug\net10.0\refint\WhileLoop.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\obj\Debug\net10.0\WhileLoop.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\obj\Debug\net10.0\WhileLoop.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\obj\Debug\net10.0\ref\WhileLoop.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\WhileLoop\WhileLoop\obj\Debug\net10.0\WhileLoop.csproj.Up2Date

@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\TextAdventureGame\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{3F980A5B-AF3A-4658-B2AB-DF30004D9F4E}|TextAdventureGame\\TextAdventureGame.csproj|c:\\sc_shriyahariparsad_2026\\complete c# masterclass\\textadventuregame\\textadventuregame\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F980A5B-AF3A-4658-B2AB-DF30004D9F4E}|TextAdventureGame\\TextAdventureGame.csproj|solutionrelative:textadventuregame\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\TextAdventureGame\\TextAdventureGame\\Program.cs",
+              "RelativeDocumentMoniker": "TextAdventureGame\\Program.cs",
+              "ToolTip": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\TextAdventureGame\\TextAdventureGame\\Program.cs",
+              "RelativeToolTip": "TextAdventureGame\\Program.cs",
+              "ViewState": "AgIAACYAAAAAAAAAAAAowDkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-05T10:46:34.306Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

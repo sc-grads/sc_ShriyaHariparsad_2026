@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\bin\Debug\net10.0\AverageCalculator.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\bin\Debug\net10.0\AverageCalculator.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\bin\Debug\net10.0\AverageCalculator.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\bin\Debug\net10.0\AverageCalculator.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\bin\Debug\net10.0\AverageCalculator.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\obj\Debug\net10.0\AverageCalculator.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\obj\Debug\net10.0\AverageCalculator.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\obj\Debug\net10.0\AverageCalculator.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\obj\Debug\net10.0\AverageCalculator.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\obj\Debug\net10.0\AverageCalculator.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\obj\Debug\net10.0\AverageCalculator.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\obj\Debug\net10.0\refint\AverageCalculator.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\obj\Debug\net10.0\AverageCalculator.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\obj\Debug\net10.0\AverageCalculator.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\obj\Debug\net10.0\ref\AverageCalculator.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\AverageCalculator\AverageCalculator\obj\Debug\net10.0\AverageC.ABAE6239.Up2Date

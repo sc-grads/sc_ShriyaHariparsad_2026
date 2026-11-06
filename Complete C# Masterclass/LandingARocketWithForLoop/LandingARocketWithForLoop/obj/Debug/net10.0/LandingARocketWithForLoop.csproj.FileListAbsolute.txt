@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\bin\Debug\net10.0\LandingARocketWithForLoop.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\bin\Debug\net10.0\LandingARocketWithForLoop.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\bin\Debug\net10.0\LandingARocketWithForLoop.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\bin\Debug\net10.0\LandingARocketWithForLoop.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\bin\Debug\net10.0\LandingARocketWithForLoop.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\obj\Debug\net10.0\LandingARocketWithForLoop.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\obj\Debug\net10.0\LandingARocketWithForLoop.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\obj\Debug\net10.0\LandingARocketWithForLoop.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\obj\Debug\net10.0\LandingARocketWithForLoop.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\obj\Debug\net10.0\LandingARocketWithForLoop.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\obj\Debug\net10.0\LandingARocketWithForLoop.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\obj\Debug\net10.0\refint\LandingARocketWithForLoop.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\obj\Debug\net10.0\LandingARocketWithForLoop.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\obj\Debug\net10.0\LandingARocketWithForLoop.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\obj\Debug\net10.0\ref\LandingARocketWithForLoop.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\LandingARocketWithForLoop\LandingARocketWithForLoop\obj\Debug\net10.0\LandingA.EDC2178C.Up2Date

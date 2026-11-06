@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\bin\Debug\net10.0\ForLoop.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\bin\Debug\net10.0\ForLoop.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\bin\Debug\net10.0\ForLoop.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\bin\Debug\net10.0\ForLoop.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\bin\Debug\net10.0\ForLoop.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\obj\Debug\net10.0\ForLoop.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\obj\Debug\net10.0\ForLoop.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\obj\Debug\net10.0\ForLoop.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\obj\Debug\net10.0\ForLoop.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\obj\Debug\net10.0\ForLoop.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\obj\Debug\net10.0\ForLoop.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\obj\Debug\net10.0\refint\ForLoop.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\obj\Debug\net10.0\ForLoop.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\obj\Debug\net10.0\ForLoop.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\obj\Debug\net10.0\ref\ForLoop.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ForLoop\ForLoop\obj\Debug\net10.0\ForLoop.csproj.Up2Date

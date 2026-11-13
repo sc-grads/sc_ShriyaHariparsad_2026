@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\bin\Debug\net10.0\Dictionaries.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\bin\Debug\net10.0\Dictionaries.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\bin\Debug\net10.0\Dictionaries.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\bin\Debug\net10.0\Dictionaries.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\bin\Debug\net10.0\Dictionaries.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\obj\Debug\net10.0\Dictionaries.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\obj\Debug\net10.0\Dictionaries.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\obj\Debug\net10.0\Dictionaries.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\obj\Debug\net10.0\Dictionaries.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\obj\Debug\net10.0\Dictionaries.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\obj\Debug\net10.0\Dictionaries.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\obj\Debug\net10.0\refint\Dictionaries.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\obj\Debug\net10.0\Dictionaries.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\obj\Debug\net10.0\Dictionaries.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\obj\Debug\net10.0\ref\Dictionaries.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Dictionaries\Dictionaries\obj\Debug\net10.0\Dictiona.48E65894.Up2Date

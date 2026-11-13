@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\bin\Debug\net10.0\RemovingItemsFromAList.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\bin\Debug\net10.0\RemovingItemsFromAList.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\bin\Debug\net10.0\RemovingItemsFromAList.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\bin\Debug\net10.0\RemovingItemsFromAList.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\bin\Debug\net10.0\RemovingItemsFromAList.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\obj\Debug\net10.0\RemovingItemsFromAList.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\obj\Debug\net10.0\RemovingItemsFromAList.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\obj\Debug\net10.0\RemovingItemsFromAList.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\obj\Debug\net10.0\RemovingItemsFromAList.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\obj\Debug\net10.0\RemovingItemsFromAList.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\obj\Debug\net10.0\RemovingItemsFromAList.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\obj\Debug\net10.0\refint\RemovingItemsFromAList.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\obj\Debug\net10.0\RemovingItemsFromAList.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\obj\Debug\net10.0\RemovingItemsFromAList.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\obj\Debug\net10.0\ref\RemovingItemsFromAList.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\RemovingItemsFromAList\RemovingItemsFromAList\obj\Debug\net10.0\Removing.502725D7.Up2Date

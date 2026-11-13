@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\bin\Debug\net10.0\PredicatesAndLambdas.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\bin\Debug\net10.0\PredicatesAndLambdas.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\bin\Debug\net10.0\PredicatesAndLambdas.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\bin\Debug\net10.0\PredicatesAndLambdas.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\bin\Debug\net10.0\PredicatesAndLambdas.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\obj\Debug\net10.0\PredicatesAndLambdas.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\obj\Debug\net10.0\PredicatesAndLambdas.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\obj\Debug\net10.0\PredicatesAndLambdas.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\obj\Debug\net10.0\PredicatesAndLambdas.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\obj\Debug\net10.0\PredicatesAndLambdas.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\obj\Debug\net10.0\PredicatesAndLambdas.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\obj\Debug\net10.0\refint\PredicatesAndLambdas.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\obj\Debug\net10.0\PredicatesAndLambdas.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\obj\Debug\net10.0\PredicatesAndLambdas.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\obj\Debug\net10.0\ref\PredicatesAndLambdas.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\PredicatesAndLambdas\PredicatesAndLambdas\obj\Debug\net10.0\Predicat.2F89ED43.Up2Date

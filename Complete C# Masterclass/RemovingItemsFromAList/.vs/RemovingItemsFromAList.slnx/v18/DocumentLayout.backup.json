@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\RemovingItemsFromAList\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{5DC78ED5-96CF-4F7C-AF85-000A548298E6}|RemovingItemsFromAList\\RemovingItemsFromAList.csproj|c:\\sc_shriyahariparsad_2026\\complete c# masterclass\\removingitemsfromalist\\removingitemsfromalist\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DC78ED5-96CF-4F7C-AF85-000A548298E6}|RemovingItemsFromAList\\RemovingItemsFromAList.csproj|solutionrelative:removingitemsfromalist\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\RemovingItemsFromAList\\RemovingItemsFromAList\\Program.cs",
+              "RelativeDocumentMoniker": "RemovingItemsFromAList\\Program.cs",
+              "ToolTip": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\RemovingItemsFromAList\\RemovingItemsFromAList\\Program.cs",
+              "RelativeToolTip": "RemovingItemsFromAList\\Program.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAowCcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-11T08:15:18.508Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

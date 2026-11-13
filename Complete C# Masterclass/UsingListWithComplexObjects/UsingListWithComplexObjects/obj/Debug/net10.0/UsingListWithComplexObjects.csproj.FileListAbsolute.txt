@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\bin\Debug\net10.0\UsingListWithComplexObjects.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\bin\Debug\net10.0\UsingListWithComplexObjects.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\bin\Debug\net10.0\UsingListWithComplexObjects.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\bin\Debug\net10.0\UsingListWithComplexObjects.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\bin\Debug\net10.0\UsingListWithComplexObjects.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\obj\Debug\net10.0\UsingListWithComplexObjects.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\obj\Debug\net10.0\UsingListWithComplexObjects.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\obj\Debug\net10.0\UsingListWithComplexObjects.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\obj\Debug\net10.0\UsingListWithComplexObjects.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\obj\Debug\net10.0\UsingListWithComplexObjects.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\obj\Debug\net10.0\UsingListWithComplexObjects.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\obj\Debug\net10.0\refint\UsingListWithComplexObjects.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\obj\Debug\net10.0\UsingListWithComplexObjects.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\obj\Debug\net10.0\UsingListWithComplexObjects.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\obj\Debug\net10.0\ref\UsingListWithComplexObjects.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\UsingListWithComplexObjects\UsingListWithComplexObjects\obj\Debug\net10.0\UsingLis.538B3979.Up2Date

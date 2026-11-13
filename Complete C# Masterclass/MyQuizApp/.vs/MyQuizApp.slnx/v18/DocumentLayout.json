@@ -1,0 +1,71 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\MyQuizApp\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{702CF453-3492-4E6A-B310-9EBF9D824EBA}|MyQuizApp\\MyQuizApp.csproj|c:\\sc_shriyahariparsad_2026\\complete c# masterclass\\myquizapp\\myquizapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{702CF453-3492-4E6A-B310-9EBF9D824EBA}|MyQuizApp\\MyQuizApp.csproj|solutionrelative:myquizapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{702CF453-3492-4E6A-B310-9EBF9D824EBA}|MyQuizApp\\MyQuizApp.csproj|c:\\sc_shriyahariparsad_2026\\complete c# masterclass\\myquizapp\\myquizapp\\question.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{702CF453-3492-4E6A-B310-9EBF9D824EBA}|MyQuizApp\\MyQuizApp.csproj|solutionrelative:myquizapp\\question.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{702CF453-3492-4E6A-B310-9EBF9D824EBA}|MyQuizApp\\MyQuizApp.csproj|c:\\sc_shriyahariparsad_2026\\complete c# masterclass\\myquizapp\\myquizapp\\quiz.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{702CF453-3492-4E6A-B310-9EBF9D824EBA}|MyQuizApp\\MyQuizApp.csproj|solutionrelative:myquizapp\\quiz.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Question.cs",
+              "DocumentMoniker": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\MyQuizApp\\MyQuizApp\\Question.cs",
+              "RelativeDocumentMoniker": "MyQuizApp\\Question.cs",
+              "ToolTip": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\MyQuizApp\\MyQuizApp\\Question.cs",
+              "RelativeToolTip": "MyQuizApp\\Question.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAADwvx0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-11T08:11:44.801Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Quiz.cs",
+              "DocumentMoniker": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\MyQuizApp\\MyQuizApp\\Quiz.cs",
+              "RelativeDocumentMoniker": "MyQuizApp\\Quiz.cs",
+              "ToolTip": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\MyQuizApp\\MyQuizApp\\Quiz.cs",
+              "RelativeToolTip": "MyQuizApp\\Quiz.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-11T08:11:15.96Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\MyQuizApp\\MyQuizApp\\Program.cs",
+              "RelativeDocumentMoniker": "MyQuizApp\\Program.cs",
+              "ToolTip": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\MyQuizApp\\MyQuizApp\\Program.cs",
+              "RelativeToolTip": "MyQuizApp\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-11T08:09:49.242Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

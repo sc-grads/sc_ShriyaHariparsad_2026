@@ -1,0 +1,53 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\FirstClass\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{DF209A5F-A24B-35DE-23F6-C750C2A3284E}|FirstClass\\FirstClass.csproj|c:\\sc_shriyahariparsad_2026\\complete c# masterclass\\firstclass\\firstclass\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DF209A5F-A24B-35DE-23F6-C750C2A3284E}|FirstClass\\FirstClass.csproj|solutionrelative:firstclass\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DF209A5F-A24B-35DE-23F6-C750C2A3284E}|FirstClass\\FirstClass.csproj|c:\\sc_shriyahariparsad_2026\\complete c# masterclass\\firstclass\\firstclass\\car.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DF209A5F-A24B-35DE-23F6-C750C2A3284E}|FirstClass\\FirstClass.csproj|solutionrelative:firstclass\\car.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Car.cs",
+              "DocumentMoniker": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\FirstClass\\FirstClass\\Car.cs",
+              "RelativeDocumentMoniker": "FirstClass\\Car.cs",
+              "ToolTip": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\FirstClass\\FirstClass\\Car.cs",
+              "RelativeToolTip": "FirstClass\\Car.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-10T09:54:29.676Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\FirstClass\\FirstClass\\Program.cs",
+              "RelativeDocumentMoniker": "FirstClass\\Program.cs",
+              "ToolTip": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\FirstClass\\FirstClass\\Program.cs",
+              "RelativeToolTip": "FirstClass\\Program.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-10T09:50:11.085Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

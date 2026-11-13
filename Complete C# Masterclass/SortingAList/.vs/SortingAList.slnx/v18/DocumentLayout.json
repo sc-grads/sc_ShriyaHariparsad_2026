@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\SortingAList\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{CDA89FF5-72D6-4B3D-834C-10AD6C254751}|SortingAList\\SortingAList.csproj|c:\\sc_shriyahariparsad_2026\\complete c# masterclass\\sortingalist\\sortingalist\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CDA89FF5-72D6-4B3D-834C-10AD6C254751}|SortingAList\\SortingAList.csproj|solutionrelative:sortingalist\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\SortingAList\\SortingAList\\Program.cs",
+              "RelativeDocumentMoniker": "SortingAList\\Program.cs",
+              "ToolTip": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\SortingAList\\SortingAList\\Program.cs",
+              "RelativeToolTip": "SortingAList\\Program.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAowBwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-11T08:21:25.031Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

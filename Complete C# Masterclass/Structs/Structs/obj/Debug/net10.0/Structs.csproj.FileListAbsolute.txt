@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\bin\Debug\net10.0\Structs.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\bin\Debug\net10.0\Structs.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\bin\Debug\net10.0\Structs.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\bin\Debug\net10.0\Structs.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\bin\Debug\net10.0\Structs.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\obj\Debug\net10.0\Structs.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\obj\Debug\net10.0\Structs.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\obj\Debug\net10.0\Structs.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\obj\Debug\net10.0\Structs.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\obj\Debug\net10.0\Structs.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\obj\Debug\net10.0\Structs.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\obj\Debug\net10.0\refint\Structs.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\obj\Debug\net10.0\Structs.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\obj\Debug\net10.0\Structs.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\obj\Debug\net10.0\ref\Structs.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\Structs\Structs\obj\Debug\net10.0\Structs.csproj.Up2Date

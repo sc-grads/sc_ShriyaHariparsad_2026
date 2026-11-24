@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\bin\Debug\net10.0\ConstructorInheritance.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\bin\Debug\net10.0\ConstructorInheritance.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\bin\Debug\net10.0\ConstructorInheritance.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\bin\Debug\net10.0\ConstructorInheritance.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\bin\Debug\net10.0\ConstructorInheritance.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\obj\Debug\net10.0\ConstructorInheritance.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\obj\Debug\net10.0\ConstructorInheritance.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\obj\Debug\net10.0\ConstructorInheritance.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\obj\Debug\net10.0\ConstructorInheritance.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\obj\Debug\net10.0\ConstructorInheritance.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\obj\Debug\net10.0\ConstructorInheritance.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\obj\Debug\net10.0\refint\ConstructorInheritance.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\obj\Debug\net10.0\ConstructorInheritance.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\obj\Debug\net10.0\ConstructorInheritance.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\obj\Debug\net10.0\ref\ConstructorInheritance.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\ConstructorInheritance\ConstructorInheritance\obj\Debug\net10.0\Construc.C42707A9.Up2Date

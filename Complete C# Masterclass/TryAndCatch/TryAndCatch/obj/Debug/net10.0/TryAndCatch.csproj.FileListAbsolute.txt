@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\bin\Debug\net10.0\TryAndCatch.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\bin\Debug\net10.0\TryAndCatch.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\bin\Debug\net10.0\TryAndCatch.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\bin\Debug\net10.0\TryAndCatch.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\bin\Debug\net10.0\TryAndCatch.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\obj\Debug\net10.0\TryAndCatch.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\obj\Debug\net10.0\TryAndCatch.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\obj\Debug\net10.0\TryAndCatch.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\obj\Debug\net10.0\TryAndCatch.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\obj\Debug\net10.0\TryAndCatch.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\obj\Debug\net10.0\TryAndCatch.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\obj\Debug\net10.0\refint\TryAndCatch.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\obj\Debug\net10.0\TryAndCatch.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\obj\Debug\net10.0\TryAndCatch.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\obj\Debug\net10.0\ref\TryAndCatch.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TryAndCatch\TryAndCatch\obj\Debug\net10.0\TryAndCa.716638A4.Up2Date

@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\bin\Debug\net10.0\TypeOfInheritance.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\bin\Debug\net10.0\TypeOfInheritance.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\bin\Debug\net10.0\TypeOfInheritance.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\bin\Debug\net10.0\TypeOfInheritance.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\bin\Debug\net10.0\TypeOfInheritance.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\obj\Debug\net10.0\TypeOfInheritance.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\obj\Debug\net10.0\TypeOfInheritance.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\obj\Debug\net10.0\TypeOfInheritance.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\obj\Debug\net10.0\TypeOfInheritance.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\obj\Debug\net10.0\TypeOfInheritance.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\obj\Debug\net10.0\TypeOfInheritance.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\obj\Debug\net10.0\refint\TypeOfInheritance.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\obj\Debug\net10.0\TypeOfInheritance.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\obj\Debug\net10.0\TypeOfInheritance.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\obj\Debug\net10.0\ref\TypeOfInheritance.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\TypeOfInheritance\TypeOfInheritance\obj\Debug\net10.0\TypeOfIn.AED90D92.Up2Date

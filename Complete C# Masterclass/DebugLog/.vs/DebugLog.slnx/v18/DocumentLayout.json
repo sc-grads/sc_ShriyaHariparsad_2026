@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\DebugLog\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F06FB440-C097-47E9-9859-F771EC2ED8CF}|DebugLog\\DebugLog.csproj|c:\\sc_shriyahariparsad_2026\\complete c# masterclass\\debuglog\\debuglog\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F06FB440-C097-47E9-9859-F771EC2ED8CF}|DebugLog\\DebugLog.csproj|solutionrelative:debuglog\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\DebugLog\\DebugLog\\Program.cs",
+              "RelativeDocumentMoniker": "DebugLog\\Program.cs",
+              "ToolTip": "C:\\sc_ShriyaHariparsad_2026\\Complete C# Masterclass\\DebugLog\\DebugLog\\Program.cs",
+              "RelativeToolTip": "DebugLog\\Program.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAAqwC0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-13T04:39:16.177Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

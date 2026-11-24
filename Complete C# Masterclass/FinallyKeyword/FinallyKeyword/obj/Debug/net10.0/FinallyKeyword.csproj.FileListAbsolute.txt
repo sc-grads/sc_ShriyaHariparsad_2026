@@ -1,0 +1,16 @@
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\bin\Debug\net10.0\FinallyKeyword.exe
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\bin\Debug\net10.0\FinallyKeyword.deps.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\bin\Debug\net10.0\FinallyKeyword.runtimeconfig.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\bin\Debug\net10.0\FinallyKeyword.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\bin\Debug\net10.0\FinallyKeyword.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\obj\Debug\net10.0\FinallyKeyword.GeneratedMSBuildEditorConfig.editorconfig
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\obj\Debug\net10.0\FinallyKeyword.AssemblyInfoInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\obj\Debug\net10.0\FinallyKeyword.AssemblyInfo.cs
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\obj\Debug\net10.0\FinallyKeyword.csproj.CoreCompileInputs.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\obj\Debug\net10.0\FinallyKeyword.sourcelink.json
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\obj\Debug\net10.0\FinallyKeyword.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\obj\Debug\net10.0\refint\FinallyKeyword.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\obj\Debug\net10.0\FinallyKeyword.pdb
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\obj\Debug\net10.0\FinallyKeyword.genruntimeconfig.cache
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\obj\Debug\net10.0\ref\FinallyKeyword.dll
+C:\sc_ShriyaHariparsad_2026\Complete C# Masterclass\FinallyKeyword\FinallyKeyword\obj\Debug\net10.0\FinallyK.FBD010F6.Up2Date
